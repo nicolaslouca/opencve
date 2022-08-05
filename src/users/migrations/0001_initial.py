@@ -111,25 +111,9 @@ class Migration(migrations.Migration):
                         db_index=True, default=django.utils.timezone.now
                     ),
                 ),
-                ("enable_notifications", models.BooleanField(default=True)),
-                (
-                    "filters_notifications",
-                    models.JSONField(default=users.models.get_default_filters),
-                ),
                 (
                     "settings",
                     models.JSONField(default=users.models.get_default_settings),
-                ),
-                (
-                    "frequency_notifications",
-                    models.CharField(
-                        choices=[
-                            ("once", "Once a day"),
-                            ("always", "As soon as a change is detected"),
-                        ],
-                        default="always",
-                        max_length=6,
-                    ),
                 ),
                 (
                     "groups",

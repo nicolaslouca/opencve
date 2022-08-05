@@ -41,6 +41,6 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
     ],
-    #entry_points={"console_scripts": ["opencve=opencve.cli:run"]},
+    # entry_points={"console_scripts": ["opencve=opencve.cli:run"]},
     python_requires=">=3.6",
 )

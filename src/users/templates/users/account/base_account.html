@@ -22,6 +22,9 @@
                 <li class="{% is_active_link 'subscriptions' %}">
                     <a href="{% url 'subscriptions' %}">Subscriptions</a>
                 </li>
+                <li class="{% is_active_link 'integrations' 'create_integration' 'update_integration' 'delete_integration' %}">
+                    <a href="{% url 'integrations' %}">Integrations</a>
+                </li>
                 <li class="{% is_active_link 'tags' 'edit_tag' 'delete_tag' %}">
                     <a href="{% url 'tags' %}">Tags</a>
                 </li>

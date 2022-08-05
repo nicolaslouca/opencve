@@ -1,5 +1,5 @@
-django==4.0.1
-django[bcrypt]==4.0.1
+django==4.1
+django[bcrypt]==4.1
 django-crispy-forms==1.14.0
 django-debug-toolbar==3.6.0
 

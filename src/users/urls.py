@@ -1,6 +1,7 @@
 from django.contrib.auth import views
 from django.urls import path
 
+from integrations.views import IntegrationsView, IntegrationCreateView, IntegrationUpdateView
 from users.views import (
     CustomPasswordResetConfirmView,
     CustomPasswordResetView,
@@ -25,6 +26,9 @@ urlpatterns = [
     path("tags/", TagsView.as_view(), name="tags"),
     path("tags/<name>/", TagsView.as_view(), name="edit_tag"),
     path("tags/<name>/delete", TagDeleteView.as_view(), name="delete_tag"),
+    path("integrations/", IntegrationsView.as_view(), name="integrations"),
+    path("integrations/add", IntegrationCreateView.as_view(), name="create_integration"),
+    path("integrations/<name>", IntegrationUpdateView.as_view(), name="update_integration"),
     path(
         "reset/<uidb64>/<token>/",
         CustomPasswordResetConfirmView.as_view(),
