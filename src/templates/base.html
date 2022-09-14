@@ -94,6 +94,7 @@
                         <li class="{% is_active_link 'home' %}"><a href="{% url 'home' %}"><i class="fa fa-home"></i><span>Dashboard</span></a></li>
                         {% endif %}
                         <li class="{% is_active_link 'cves' 'cve' 'change' %}"><a href="{% url 'cves' %}"><i class="fa fa-shield"></i> <span>Vulnerabilities (CVE)</span></a></li>
+                        <li class="{% is_active_link 'advisories' %}"><a href="{% url 'advisories' %}"><i class="fa fa-th-list"></i> <span>Advisories</span></a></li>
                         <li class="{% is_active_link 'vendors' %}"><a href="{% url 'vendors' %}"><i class="fa fa-tags"></i> <span> Vendors & Products (CPE)</span></a></li>
                         <li class="{% is_active_link 'cwes' %}"><a href="{% url 'cwes' %}"><i class="fa fa-sitemap"></i> <span> Categories (CWE)</span></a></li>
                     </ul>

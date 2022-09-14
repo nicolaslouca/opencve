@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "changes",
     "users",
     "integrations",
+    "advisories",
 ]
 
 MIDDLEWARE = [

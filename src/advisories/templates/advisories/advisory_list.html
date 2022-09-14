@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Advisories - {{ block.super }}{% endblock %}
+
+{% block content %}
+
+<section class="content-header">
+    <h1>Advisories</h1>
+    <ol class="breadcrumb">
+        <li><a href="{% url 'home' %}">OpenCVE</a></li>
+        <li class="active">Advisories</li>
+    </ol>
+</section>
+
+<section class="content">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="box box-solid">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Folders</h3>
+                    <div class="box-tools">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="box-body no-padding" style="">
+                    <ul class="nav nav-pills nav-stacked">
+                      <li class="active">
+                        <a href="#">
+                          <i class="fa fa-inbox"></i> All <span class="label label-primary pull-right">12</span>
+                        </a>
+                      </li>
+                      <li>
+                        <a href="#">
+                          <i class="fa fa-envelope-o"></i> Sent </a>
+                      </li>
+                      <li>
+                        <a href="#">
+                          <i class="fa fa-file-text-o"></i> Drafts </a>
+                      </li>
+                      <li>
+                        <a href="#">
+                          <i class="fa fa-filter"></i> Junk <span class="label label-warning pull-right">65</span>
+                        </a>
+                      </li>
+                      <li>
+                        <a href="#">
+                          <i class="fa fa-trash-o"></i> Trash </a>
+                      </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="box box-primary">
+              <div class="box-header with-border">
+                <h3 class="box-title">Advisories</h3>
+              </div>
+              <div class="box-body no-padding">
+                <div class="table-responsive mailbox-messages">
+                  <table class="table table-hover table-striped">
+                    <tbody>
+                      {% for advisory in advisories %}
+                      <tr>
+                        <td class="mailbox-star">
+                          <a href="#">
+                            <i class="fa fa-star text-yellow"></i>
+                          </a>
+                        </td>
+                        <td class="mailbox-name">
+                          <a href="read-mail.html">Alexander Pierce</a>
+                        </td>
+                        <td class="mailbox-subject">
+                          {{ advisory }}
+                        </td>
+                        <td class="mailbox-attachment"></td>
+                        <td class="mailbox-date">5 mins ago</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div></div>
+            </div>
+        </div>
+
+        <div class="center">
+            <div class="pagination">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1">&laquo; first</a>
+                        <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                    {% endif %}
+
+                    <span class="current">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                    </span>
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">next</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
