@@ -339,3 +339,11 @@ pre.plainJSON{
 .change-collapsed[aria-expanded=false] .fa-arrow-circle-o-up {
   display: none;
 }
+
+.source-logo {
+    float: left;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    margin-right: 10px;
+}

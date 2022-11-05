@@ -10,7 +10,7 @@ from advisories.models import Advisory
 
 class Command(BaseCommand):
     CURRENT_YEAR = arrow.now().year
-    CVE_FIRST_YEAR = 2002
+    CVE_FIRST_YEAR = 2018
     BASE_URL = "https://www.debian.org/security"
     STRAINER = SoupStrainer("div", id="content")
 
@@ -31,13 +31,13 @@ class Command(BaseCommand):
 
         # Populate the advisory object
         advisory = Advisory(
-            name=dsa,
-            text=soup.find("dt", text="More information:").find_next_sibling("dd").text,
             source="dsa",
+            key=dsa,
+            title=soup.h2.text.split("--")[0].strip(),
+            text=soup.find("dt", text="More information:").find_next_sibling("dd").text,
             created_at=creation_date,
             updated_at=creation_date,
             extras={
-                "title": soup.h2.text.split("--")[0].strip(),
                 "vulnerable": soup.find("dt", text="Vulnerable:")
                 .find_next_sibling("dd")
                 .text,
@@ -74,7 +74,7 @@ class Command(BaseCommand):
         return advisories
 
     def handle(self, *args, **kwargs):
-        for year in range(2021, 2023):
+        for year in range(self.CVE_FIRST_YEAR, self.CURRENT_YEAR + 1):
             self.info(self.style.MIGRATE_HEADING(f"Importing DSA for {year}:"))
 
             # Extract the list of DSA for this year and insert it in DB

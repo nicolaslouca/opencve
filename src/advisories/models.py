@@ -4,10 +4,12 @@ from core.models import BaseModel
 
 
 class Advisory(BaseModel):
-    name = models.CharField(max_length=128, blank=False)
+    key = models.CharField(max_length=32, blank=False)
+    title = models.CharField(max_length=200, blank=False)
     text = models.TextField(default=None)
     source = models.CharField(max_length=32, blank=False)
     extras = models.JSONField()
+    original_url = models.URLField()
 
     class Meta:
         db_table = "opencve_advisories"

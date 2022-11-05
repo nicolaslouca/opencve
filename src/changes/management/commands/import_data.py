@@ -17,8 +17,8 @@ from core.utils import convert_cpes, flatten_vendors, get_cwes
 
 
 class Command(BaseCommand):
-    CURRENT_YEAR = arrow.now().year
-    CVE_FIRST_YEAR = 2002
+    CURRENT_YEAR = 2021#arrow.now().year
+    CVE_FIRST_YEAR = 2020#2002
     MITRE_CWE_URL = "https://cwe.mitre.org/data/xml/cwec_latest.xml.zip"
     NVD_CVE_URL = "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-{year}.json.gz"
     NVD_CPE_URL = "https://nvd.nist.gov/feeds/xml/cpe/dictionary/official-cpe-dictionary_v2.3.xml.gz"

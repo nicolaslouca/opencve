@@ -42,7 +42,8 @@ def download_modified_items():
     return items
 
 
-def check_for_update(cve_json, task):
+@shared_task(name="CHECK_FOR_UPDATE")
+def check_for_update(cve_json, task_id):
     cve_id = cve_json["cve"]["CVE_data_meta"]["ID"]
     cve_obj = Cve.objects.filter(cve_id=cve_id).first()
     events = []
@@ -73,13 +74,13 @@ def check_for_update(cve_json, task):
 
     # Create the change
     if events:
-        CveUtil.create_change(cve_obj, cve_json, task, events)
+        CveUtil.create_change(cve_obj, cve_json, task_id, events)
         logger.info(f"[{cve_obj.cve_id}] CVE has changed ({len(events)} events)")
 
 
-@shared_task(name="HANDLE_EVENTS")
-def handle_events():
-    logger.info("Checking for new events...")
+@shared_task(name="CHECK_NVD_EVENTS")
+def check_nvd_events():
+    logger.info("Checking for new NVD events...")
     has_changed, checksum = checksum_has_changed()
     if not has_changed:
         logger.info("DB is up to date.")
@@ -91,7 +92,9 @@ def handle_events():
 
     # Create the task containing the changes
     task = Task.objects.create(nvd_checksum=checksum)
+    task_id = task.id
+    logger.info(f"Task {task_id} created")
 
     logger.info("Checking {} CVEs...".format(len(items)))
     for item in items:
-        check_for_update(item, task)
+        check_for_update.apply_async(args=(item, task_id))

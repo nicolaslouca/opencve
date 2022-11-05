@@ -29,12 +29,12 @@ class CveUtil(object):
         return event
 
     @classmethod
-    def create_change(cls, cve_obj, cve_json, task, events):
+    def create_change(cls, cve_obj, cve_json, task_id, events):
         change = Change(
             created_at=arrow.get(cve_json["lastModifiedDate"]).datetime,
             updated_at=arrow.get(cve_json["lastModifiedDate"]).datetime,
             cve=cve_obj,
-            task=task,
+            task_id=task_id,
             json=cve_json,
         )
         change.save()
@@ -80,29 +80,29 @@ class CveUtil(object):
 
         # Add the CWE that not exists yet in database
         for cwe in cwes:
-            cwe_obj = Cwe.objects.filter(cwe_id=cwe).first()
-            if not cwe_obj:
+            _, created = Cwe.objects.get_or_create(cwe_id=cwe)
+            if created:
                 logger.info(
-                    f"{cwe} detected in {cve.cve_id} but not existing in database, adding it..."
+                    f"New CVE {cwe} added (detected in {cve.cve_id})"
                 )
-                cwe_obj = Cwe.objects.create(cwe_id=cwe)
 
-        # Add the CPEs
+        # Add the vendors and their products
         vendors_products = convert_cpes(
             nested_lookup("cpe23Uri", cve_json["configurations"])
         )
         for vendor, products in vendors_products.items():
-            v_obj = Vendor.objects.filter(name=vendor).first()
+            v_obj, created = Vendor.objects.get_or_create(name=vendor)
+            if created:
+                logger.info(
+                    f"New vendor {vendor} added (detected in {cve.cve_id})"
+                )
 
-            # Create the vendor
-            if not v_obj:
-                v_obj = Vendor.objects.create(name=vendor)
-
-            # Create the products
             for product in products:
-                p_obj = Product.objects.filter(name=product, vendor=v_obj).first()
-                if not p_obj:
-                    p_obj = Product.objects.create(name=product, vendor=v_obj)
+                _, created = Product.objects.get_or_create(name=product, vendor=v_obj)
+                if created:
+                    logger.info(
+                        f"New product {product} added (detected in {cve.cve_id})"
+                    )
 
         return cve
 
