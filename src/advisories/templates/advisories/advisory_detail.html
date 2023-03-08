@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ advisory.title }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+
+{{ advisory }}
+
+{% endblock %}

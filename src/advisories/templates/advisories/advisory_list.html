@@ -17,6 +17,53 @@
 <section class="content">
 
     <div class="row">
+        <div class="col-md-9">
+            <div class="box box-primary">
+                <div class="box-body table-responsive no-padding">
+                  <table class="table">
+                    <thead>
+                        <th class="col-md-3">Advisory</th>
+                        <th class="col-md-6">Related CVEs</th>
+                        <th class="col-md-2">Date</th>
+                    </thead>
+                    <tbody>
+                      {% for advisory in advisories %}
+                      <tr>
+                        <td><img src="{% static 'img/sources/'|add:advisory.source|add:'.png' %}" class="source-logo" alt="{{ advisory.source }}"/>
+                            <a href="{% url 'advisory' key=advisory.key %}"><strong>{{ advisory.key }}</strong></a>
+                        </td>
+                        <td><span class="badge badge-primary">3</span> <a href="#">CVE-2022-1234</a>, <a href="#">CVE-2022-4567</a></td>
+                        <td>{{ advisory.created_at|naturaltime }}</td>
+                      </tr>
+                      <tr>
+                          <td class="col-md-12 no-bordered" colspan="3">{{ advisory.text|truncatewords:40 }}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+            </div>
+            <div class="center">
+                <div class="pagination">
+                    <span class="step-links">
+                        {% if page_obj.has_previous %}
+                            <a href="?page=1">&laquo; first</a>
+                            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                        {% endif %}
+
+                        <span class="current">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                        </span>
+
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}">next</a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
         <div class="col-md-3">
             <div class="box box-primary">
                 <div class="box-header with-border">
@@ -43,53 +90,6 @@
             </div>
         </div>
 
-        <div class="col-md-9">
-            <div class="box box-primary">
-              <div class="box-header with-border">
-                <h3 class="box-title">Advisories</h3>
-              </div>
-              <div class="box-body no-padding">
-                <div class="table-responsive mailbox-messages">
-                  <table class="table table-hover table-striped">
-                    <thead>
-                        <th>Advisory</th>
-                        <th>Summary</th>
-                        <th>Added</th>
-                    </thead>
-                    <tbody>
-                      {% for advisory in advisories %}
-                      <tr>
-                        <td class="mailbox-attachment"><img src="{% static 'img/sources/'|add:advisory.source|add:'.png' %}" class="source-logo" alt="{{ advisory.source }}"/> {{ advisory.title }}</td>
-                        <td class="mailbox-date">{{ advisory.created_at|naturaltime }}</td>
-                      </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <div></div>
-            </div>
-        </div>
-
-        <div class="center">
-            <div class="pagination">
-                <span class="step-links">
-                    {% if page_obj.has_previous %}
-                        <a href="?page=1">&laquo; first</a>
-                        <a href="?page={{ page_obj.previous_page_number }}">previous</a>
-                    {% endif %}
-
-                    <span class="current">
-                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-                    </span>
-
-                    {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}">next</a>
-                        <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-                    {% endif %}
-                </span>
-            </div>
-        </div>
     </div>
 </section>
 

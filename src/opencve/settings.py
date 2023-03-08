@@ -39,13 +39,13 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
-    "debug_toolbar",
     "crispy_forms",
-    "core",
-    "changes",
-    "users",
-    "integrations",
+    "debug_toolbar",
     "advisories",
+    "changes",
+    "core",
+    "integrations",
+    "users",
 ]
 
 MIDDLEWARE = [
@@ -173,3 +173,6 @@ COUNT_EXCERPT = 3
 # Celery Configuration
 CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
 CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/1"
+
+# Fetchers configuration
+FETCHER_JVN_DATADIR = "/tmp/jvn"
