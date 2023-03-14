@@ -173,12 +173,15 @@ class CveDetailView(DetailView):
         ]
 
         # Add the associated Vendors and CWEs
-        context["vendors"] = convert_cpes(context["cve"].json["configurations"])
-        context["cwes"] = get_cwes_details(
+        configurations = context["cve"].json.get("configurations", {})
+        context["vendors"] = convert_cpes(configurations)
+
+        context["cwes"] = []
+        """context["cwes"] = get_cwes_details(
             context["cve"].json["cve"]["problemtype"]["problemtype_data"][0][
                 "description"
             ]
-        )
+        )"""
 
         # Get the CVE tags for the authenticated user
         user_tags = {}

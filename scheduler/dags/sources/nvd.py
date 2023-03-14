@@ -4,11 +4,15 @@ import time
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+import arrow
 import requests
 from airflow.models.variable import Variable
 from airflow.providers.postgres.hooks.postgres import PostgresHook
+from deepdiff import DeepDiff
+from psycopg2.extras import Json
 from pydantic import BaseModel, ValidationError
 from sources import BaseSource
+from utils import vendors_conf_to_flat, weaknesses_to_flat
 
 NVD_API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 CVE_FIRST_YEAR = 1999
@@ -24,6 +28,7 @@ class Vulnerability(BaseModel):
 
 class NvdSource(BaseSource):
     name = "nvd"
+    type = "cve"
 
     def create_years_dirs(self):
         for year in range(CVE_FIRST_YEAR, CURRENT_YEAR + 1):
@@ -87,11 +92,34 @@ class NvdSource(BaseSource):
         self.iterate(url)
 
     @classmethod
-    def create(cls, data):
-        print("INSERT INTO opencve_cves ()")
-        return {}
+    def parse_obj(cls, path, data):
+        source = {cls.name: path}
+        cvss2 = (
+            data["metrics"]["cvssMetricV2"][0]["cvssData"]["baseScore"]
+            if "cvssMetricV2" in data["metrics"]
+            else None
+        )
+
+        cvss3 = (
+            data["metrics"]["cvssMetricV3"][0]["cvssData"]["baseScore"]
+            if "cvssMetricV3" in data["metrics"]
+            else None
+        )
+
+        return {
+            "cve": data["id"],
+            "created": arrow.get(data["published"]).datetime.isoformat(),
+            "updated": arrow.get(data["lastModified"]).datetime.isoformat(),
+            "summary": data["descriptions"][0]["value"],
+            "cvss2": cvss2,
+            "cvss3": cvss3,
+            "vendors": Json(vendors_conf_to_flat(data.get("configurations"))),
+            "cwes": Json(weaknesses_to_flat(data.get("weaknesses"))),
+            "source": Json(source),
+        }
 
     @classmethod
-    def update(cls, old, data):
-        print("je vais mettre à jour une CVE existante")
+    def update(cls, path, old, data):
+        print("UPDATING NVD...")
+        # deepdiff = DeepDiff(self.left, self.right)
         return {}

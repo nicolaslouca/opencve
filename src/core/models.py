@@ -1,6 +1,9 @@
+import json
 import uuid
+from pathlib import Path
 
 from django.contrib.postgres.indexes import GinIndex, OpClass
+from django.conf import settings
 from django.db import models
 from django.db.models import signals
 from django.db.models.functions import Upper
@@ -87,12 +90,12 @@ class Product(BaseModel):
 
 class Cve(BaseModel):
     cve_id = models.CharField(max_length=20, unique=True)
-    json = models.JSONField()
-    vendors = models.JSONField()
-    cwes = models.JSONField()
+    vendors = models.JSONField(default=list)
+    cwes = models.JSONField(default=list)
+    sources = models.JSONField(default=dict)
 
     # Keep the summary separated when searching keywords
-    summary = models.TextField()
+    summary = models.TextField(default=None, null=True)
 
     # Keep CVSS separated when searching a particupal score
     cvss2 = models.FloatField(default=None, null=True)
@@ -112,6 +115,17 @@ class Cve(BaseModel):
                 name="ix_cves_cve_id",
             ),
         ]
+
+    @property
+    def json(self):
+        source_path = self.sources[next(iter(self.sources))]
+        if len(self.sources) > 1 and "nvd" in self.sources:
+            source_path = self.sources.get("nvd")
+
+        path = Path(f"{settings.LOCAL_REPO_PATH}") / Path(source_path)
+        with open(path) as f:
+            data = json.load(f)
+        return data
 
     @property
     def cvss_weight(self):

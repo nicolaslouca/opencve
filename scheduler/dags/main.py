@@ -8,8 +8,10 @@ from airflow import AirflowException
 from airflow.configuration import conf
 from airflow.decorators import dag, task
 from airflow.models import Variable
-from sources import BaseSource
+from airflow.utils.task_group import TaskGroup
+
 from changes import Handlers
+from sources import BaseSource
 from utils import import_submodules
 
 # Automatically import sources
@@ -23,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 @dag(
-    schedule="0 */2 * * *",
+    schedule="0 * * * *",
     start_date=pendulum.datetime(2023, 1, 1, tz="UTC"),
     catchup=False,
     max_active_runs=1,
@@ -100,42 +102,42 @@ def sources():
 
         # List of commits since the last analysis
         commits = [c for c in repo.iter_commits(rev=f"{last_commit_hash}..HEAD")]
-        logger.info(f"Analysing {len(commits)} commit(s) ({last_commit_hash}:{repo.head.commit.hexsha})")
+        if not commits:
+            logger.info(f"No diff to parse")
+            return
+
+        logger.info(
+            f"Analysing {len(commits)} commit(s) ({last_commit_hash}:{repo.head.commit.hexsha})"
+        )
 
         # List the diffs between last analysed commit and current one
-        #diffs = repo.commit(last_commit_hash).diff(repo.head.commit)
-        diffs = repo.commit(last_commit_hash).diff("2e60e8b5780c5c15113e49ae5778d508d2ffcfb8")
+        diffs = repo.commit(last_commit_hash).diff(repo.head.commit)
+
+        # Parse the diffs and execute their handler
         logger.info(f"Parsing {len(diffs)} diffs")
+        for diff in diffs:
+            handler = Handlers(diff)
+            handler.execute()
 
-        import csv
-        with open('/tmp/cve.csv', 'w', encoding='UTF8', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(['id', 'created_at', 'updated_at', 'cve_id', 'vendors', 'cwes', 'summary', 'cvss2', 'cvss3'])
-
-            for diff in diffs:
-                handler = Handlers(diff)
-                row = handler.execute()
-
-                if row:
-                    writer.writerow(row)
-
-        #Variable.set("last_commit_hash", repo.head.commit)
+        # Save the last know commit
+        Variable.set("last_commit_hash", repo.head.commit)
 
     # Option 1 - Use the official OpenCVE KB
     if conf.getboolean("opencve", "use_official_kb"):
-        git_pull()
+        git_pull() >> analyse_changes()
 
     # Option 2 - Maintain a KB
     else:
 
-        # We use mapped tasks to keep a simple DAG
-        sources_cls = [s for s in BaseSource.__subclasses__()]
-        (
-            git_pull()
-            >> update_source.expand(source_cls=sources_cls)
-            >> git_push()
-            >> analyse_changes()
-        )
+        # Group all the sources task in a single TaskGroup
+        with TaskGroup(group_id="sources") as sources_gt:
+            sources_cls = [s for s in BaseSource.__subclasses__()]
+            sources_tasks = []
+            for source_cls in sources_cls:
+                foo = update_source.override(task_id=source_cls.name)(source_cls)
+                sources_tasks.append(foo)
+
+        (git_pull() >> sources_gt >> git_push() >> analyse_changes())
 
 
 sources()

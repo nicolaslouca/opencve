@@ -4,8 +4,11 @@ import os
 from pathlib import Path
 from typing import List, Optional
 
+import arrow
 import requests
+from airflow.providers.postgres.hooks.postgres import PostgresHook
 from lxml import etree
+from psycopg2.extras import Json
 from pydantic import BaseModel, HttpUrl, ValidationError
 from sources import BaseSource
 
@@ -50,6 +53,7 @@ class Item(BaseModel):
 
 class JvnSource(BaseSource):
     name = "jvn"
+    type = "advisory"
 
     @staticmethod
     def reformat_references(references):
@@ -132,11 +136,19 @@ class JvnSource(BaseSource):
                     json.dump(item_data, f, indent=2, sort_keys=True)
 
     @classmethod
-    def create(cls, data):
-        print("Je vais créer une nouvelle entrée JVN...")
-        return {}
+    def parse_obj(cls, path, data):
+        return {
+            "created": arrow.get(data["date"]).datetime.isoformat(),
+            "updated": arrow.get(data["modified"]).datetime.isoformat(),
+            "key": data["identifier"],
+            "title": data["title"],
+            "text": data["description"],
+            "source": cls.name,
+            "link": data["link"],
+            "extras": Json({}),
+        }
 
     @classmethod
-    def update(cls, old, data):
-        print("Je vais modifier une JVN existante...")
+    def update(cls, path, old, data):
+        print("UPDATING JVN...")
         return {}

@@ -16,8 +16,10 @@ REDHAT_CVE_URL = "https://access.redhat.com/labs/securitydataapi/cve/{cve_id}.js
 logger = logging.getLogger("airflow.task")
 
 
-class RedhatSource(BaseSource):
+# class RedhatSource(BaseSource):
+class RedhatSource:
     name = "redhat"
+    type = "advisory"
 
     @staticmethod
     def download_file(url):
@@ -38,9 +40,9 @@ class RedhatSource(BaseSource):
                 break
 
     @classmethod
-    def create(cls, data):
+    def parse_object(cls, path, data):
         raise NotImplementedError
 
     @classmethod
-    def update(cls, old, data):
+    def update(cls, path, old, data):
         raise NotImplementedError
