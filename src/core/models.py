@@ -35,9 +35,9 @@ signals.pre_save.connect(_pre_save)
 
 
 class Cwe(BaseModel):
-    cwe_id = models.CharField(max_length=16, blank=False, db_index=True)
-    name = models.CharField(max_length=256)
-    description = models.TextField()
+    cwe_id = models.CharField(max_length=16, unique=True)
+    name = models.CharField(max_length=256, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
 
     class Meta:
         db_table = "opencve_cwes"
