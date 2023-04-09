@@ -5,6 +5,7 @@ import pathlib
 import git
 import pendulum
 from airflow import AirflowException
+from airflow.exceptions import AirflowSkipException
 from airflow.configuration import conf
 from airflow.decorators import dag, task
 from airflow.models import Variable
@@ -68,7 +69,7 @@ def sources():
 
         if not repo.is_dirty(untracked_files=True):
             logger.info(f"No change detected")
-            return
+            raise AirflowSkipException
 
         # Add all modified files
         logger.info(f"Adding changes")
@@ -90,6 +91,10 @@ def sources():
         instance.run()
 
     @task
+    def foobar():
+        pass
+
+    @task
     def analyse_changes():
         repo = git.Repo(LOCAL_REPO)
 
@@ -104,7 +109,7 @@ def sources():
         commits = [c for c in repo.iter_commits(rev=f"{last_commit_hash}..HEAD")]
         if not commits:
             logger.info(f"No diff to parse")
-            return
+            raise AirflowSkipException
 
         logger.info(
             f"Analysing {len(commits)} commit(s) (from {last_commit_hash} to {repo.head.commit.hexsha})"
@@ -128,7 +133,7 @@ def sources():
 
     # Option 1 - Use the official OpenCVE KB
     if conf.getboolean("opencve", "use_official_kb"):
-        git_pull() >> analyse_changes()
+        task_group = git_pull() >> analyse_changes()
 
     # Option 2 - Maintain a KB
     else:
@@ -141,7 +146,10 @@ def sources():
                 foo = update_source.override(task_id=source_cls.name)(source_cls)
                 sources_tasks.append(foo)
 
-        (git_pull() >> sources_gt >> git_push() >> analyse_changes())
+        task_group = (git_pull() >> sources_gt >> git_push() >> analyse_changes())
+
+    # To complete
+    task_group >> foobar()
 
 
 sources()
