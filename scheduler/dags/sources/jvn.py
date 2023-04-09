@@ -6,10 +6,10 @@ from typing import List, Optional
 
 import arrow
 import requests
-from airflow.providers.postgres.hooks.postgres import PostgresHook
 from lxml import etree
 from psycopg2.extras import Json
 from pydantic import BaseModel, HttpUrl, ValidationError
+from constants import PROCEDURES
 from sources import BaseSource
 
 JVN_RDF_URL = "https://jvndb.jvn.jp/en/rss/jvndb.rdf"
@@ -136,19 +136,17 @@ class JvnSource(BaseSource):
                     json.dump(item_data, f, indent=2, sort_keys=True)
 
     @classmethod
-    def parse_obj(cls, path, data):
-        return {
-            "created": arrow.get(data["date"]).datetime.isoformat(),
-            "updated": arrow.get(data["modified"]).datetime.isoformat(),
-            "key": data["identifier"],
-            "title": data["title"],
-            "text": data["description"],
-            "source": cls.name,
-            "link": data["link"],
-            "extras": Json({}),
-        }
-
-    @classmethod
-    def update(cls, path, old, data):
-        print("UPDATING JVN...")
-        return {}
+    def upsert(cls, data):
+        cls.sql(
+            query=PROCEDURES.get("advisory"),
+            parameters={
+                "created": arrow.get(data["date"]).datetime.isoformat(),
+                "updated": arrow.get(data["modified"]).datetime.isoformat(),
+                "key": data["identifier"],
+                "title": data["title"],
+                "text": data["description"],
+                "source": cls.name,
+                "link": data["link"],
+                "extras": Json({}),
+            },
+        )

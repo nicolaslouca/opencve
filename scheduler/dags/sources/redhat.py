@@ -38,11 +38,3 @@ class RedhatSource:
                 print(cve_list[0])
                 page += 1
                 break
-
-    @classmethod
-    def parse_object(cls, path, data):
-        raise NotImplementedError
-
-    @classmethod
-    def update(cls, path, old, data):
-        raise NotImplementedError

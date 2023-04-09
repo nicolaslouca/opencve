@@ -1,0 +1,2 @@
+apache-airflow==2.5.3
+nested-lookup==0.2.25

@@ -6,6 +6,44 @@
 
 {% block content %}
 
-{{ advisory }}
+<section class="content-header">
+    <h1>{{ advisory.key }} - <small>{{ advisory.title }}</small></h1>
+    <ol class="breadcrumb">
+        <li><a href="{% url 'home' %}">OpenCVE</a></li>
+        <li><a href="{% url 'advisories' %}">Advisories</a></li>
+        <li class="active">{{ advisory.key }}</li>
+    </ol>
+</section>
+
+<section class="content">
+    <div class="row">
+        <div class="col-md-9">
+            <div class="box box-primary">
+                <div class="box-body">
+                    <span class="dropcap">{{ advisory.text|make_list|first }}</span>{{ advisory.text|make_list|slice:'1:'|join:'' }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="box box-primary">
+                <div class="box-header">
+                    <div class="box-title">Information</div>
+                </div>
+                <div class="box-body">
+                    <p><strong>Published :</strong> {{ advisory.created_at|date:"Y-m-d H:M" }}</p>
+                    <p><strong>Updated :</strong> {{ advisory.updated_at|date:"Y-m-d H:M" }}</p>
+                    <hr/>
+                    <p><strong><i class="fa fa-external-link"></i> Link :</strong> <a href="{{ advisory.link }}" target="_blank">{{ advisory.link }}</a></p>
+                    <hr/>
+                    <p><strong><i class="fa fa-code"></i> JSON object :</strong> <a class="pointer" data-toggle="modal" data-target="#modal-default">View</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
 
 {% endblock %}

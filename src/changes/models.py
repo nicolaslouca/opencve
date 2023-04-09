@@ -23,11 +23,10 @@ class Task(BaseModel):
 
 
 class Change(BaseModel):
-    json = models.JSONField()
-
     # Relationships
     cve = models.ForeignKey(Cve, on_delete=models.CASCADE, related_name="changes")
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="changes")
+    path = models.TextField(default=None)
+    commit = models.CharField(max_length=40)
 
     class Meta:
         db_table = "opencve_changes"
@@ -49,7 +48,6 @@ class Event(BaseModel):
         default=EventType.NEW_CVE,
     )
     details = models.JSONField()
-    is_reviewed = models.BooleanField(default=False)
 
     # Relationships
     cve = models.ForeignKey(Cve, on_delete=models.CASCADE, related_name="events")

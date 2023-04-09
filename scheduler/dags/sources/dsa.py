@@ -10,6 +10,7 @@ import requests
 from airflow.models.variable import Variable
 from bs4 import BeautifulSoup, SoupStrainer
 from psycopg2.extras import Json
+from constants import PROCEDURES
 from sources import BaseSource
 
 logger = logging.getLogger("airflow.task")
@@ -109,21 +110,19 @@ class DsaSource(BaseSource):
             self.parse_year_page(self.CURRENT_YEAR)
 
     @classmethod
-    def parse_obj(cls, path, data):
-        return {
-            "created": arrow.get(data["created_at"]).datetime.isoformat(),
-            "updated": arrow.get(data["updated_at"]).datetime.isoformat(),
-            "key": data["id"],
-            "title": data["title"],
-            "text": data["text"],
-            "source": cls.name,
-            "link": "TO COMPLETE",
-            "extras": Json(
-                {"vulnerable": data["vulnerable"], "packages": data["packages"]}
-            ),
-        }
-
-    @classmethod
-    def update(cls, path, old, data):
-        print("UPDATING DSA...")
-        return {}
+    def upsert(cls, data):
+        cls.sql(
+            query=PROCEDURES.get("advisory"),
+            parameters={
+                "created": arrow.get(data["created_at"]).datetime.isoformat(),
+                "updated": arrow.get(data["updated_at"]).datetime.isoformat(),
+                "key": data["id"],
+                "title": data["title"],
+                "text": data["text"],
+                "source": cls.name,
+                "link": "TO COMPLETE",
+                "extras": Json(
+                    {"vulnerable": data["vulnerable"], "packages": data["packages"]}
+                ),
+            },
+        )

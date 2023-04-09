@@ -12,6 +12,8 @@ from deepdiff import DeepDiff
 from psycopg2.extras import Json
 from pydantic import BaseModel, ValidationError
 from sources import BaseSource
+from sources.nvd.events import NvdEvents
+from constants import PROCEDURES
 from utils import vendors_conf_to_flat, weaknesses_to_flat
 
 NVD_API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
@@ -92,8 +94,11 @@ class NvdSource(BaseSource):
         self.iterate(url)
 
     @classmethod
-    def parse_obj(cls, path, data):
-        source = {cls.name: path}
+    def upsert(cls, data):
+        cve_id = data["id"]
+        year = cve_id.split("-")[1]
+        source = {cls.name: f"{cls.name}/{year}/{cve_id}.json"}
+
         cvss2 = (
             data["metrics"]["cvssMetricV2"][0]["cvssData"]["baseScore"]
             if "cvssMetricV2" in data["metrics"]
@@ -106,20 +111,36 @@ class NvdSource(BaseSource):
             else None
         )
 
-        return {
-            "cve": data["id"],
-            "created": arrow.get(data["published"]).datetime.isoformat(),
-            "updated": arrow.get(data["lastModified"]).datetime.isoformat(),
-            "summary": data["descriptions"][0]["value"],
-            "cvss2": cvss2,
-            "cvss3": cvss3,
-            "vendors": Json(vendors_conf_to_flat(data.get("configurations"))),
-            "cwes": Json(weaknesses_to_flat(data.get("weaknesses"))),
-            "source": Json(source),
-        }
+        cls.sql(
+            query=PROCEDURES.get("nvd"),
+            parameters={
+                "cve": data["id"],
+                "created": arrow.get(data["published"]).datetime.isoformat(),
+                "updated": arrow.get(data["lastModified"]).datetime.isoformat(),
+                "summary": data["descriptions"][0]["value"],
+                "cvss2": cvss2,
+                "cvss3": cvss3,
+                "vendors": Json(vendors_conf_to_flat(data.get("configurations"))),
+                "cwes": Json(weaknesses_to_flat(data.get("weaknesses"))),
+                "source": Json(source),
+            },
+        )
 
     @classmethod
-    def update(cls, path, old, data):
-        print("UPDATING NVD...")
-        # deepdiff = DeepDiff(self.left, self.right)
-        return {}
+    def get_events(cls, old, new):
+        events = []
+
+        # New CVE
+        if not old:
+            return [{"type": "new_cve", "details": {}}]
+
+        # Check other events
+        events_cls = NvdEvents.__subclasses__()
+        for event_cls in events_cls:
+            e = event_cls(old, new)
+            event = e.execute()
+
+            if event:
+                events.append(event)
+
+        return events

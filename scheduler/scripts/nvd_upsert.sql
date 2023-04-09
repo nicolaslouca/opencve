@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE create_cve(
+CREATE OR REPLACE PROCEDURE nvd_upsert(
     cve_name text,
     created timestamp,
     updated timestamp,
@@ -62,10 +62,10 @@ END;
 $$;
 
 -- Create a CVE
-CALL create_cve('CVE-2022-40000', '2023-03-15T00:00:00.000000+00:00','2023-03-15T00:00:00.000000+00:00', 'CVE-2023-1234', 10, 10, '["foo$PRODUCT$bar", "foo$PRODUCT$baz"]', '["foo", "bar"]', '{"nvd": "nvd/2023/CVE-2023-1234.json"}');
+-- CALL nvd_upsert('CVE-2023-1234', '2023-03-15T00:00:00.000000+00:00','2023-03-15T00:00:00.000000+00:00', 'Lorem ipsum', 10, 10, '["foo$PRODUCT$bar", "foo$PRODUCT$baz"]', '["foo", "bar"]', '{"nvd": "nvd/2023/CVE-2023-1234.json"}');
 
 -- Display created rows
-SELECT id, cve_id, vendors, cwes, sources FROM opencve_cves ORDER BY updated_at DESC LIMIT 1;
-SELECT id, cwe_id FROM opencve_cwes ORDER BY updated_at DESC  LIMIT 2;
-SELECT id, name FROM opencve_vendors ORDER BY updated_at DESC  LIMIT 1;
-SELECT id, vendor_id, name FROM opencve_products ORDER BY updated_at DESC  LIMIT 2;
+-- SELECT id, cve_id, vendors, cwes, sources FROM opencve_cves ORDER BY updated_at DESC LIMIT 1;
+-- SELECT id, cwe_id FROM opencve_cwes ORDER BY updated_at DESC  LIMIT 2;
+-- SELECT id, name FROM opencve_vendors ORDER BY updated_at DESC  LIMIT 1;
+-- SELECT id, vendor_id, name FROM opencve_products ORDER BY updated_at DESC  LIMIT 2;

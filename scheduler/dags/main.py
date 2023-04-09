@@ -107,20 +107,24 @@ def sources():
             return
 
         logger.info(
-            f"Analysing {len(commits)} commit(s) ({last_commit_hash}:{repo.head.commit.hexsha})"
+            f"Analysing {len(commits)} commit(s) (from {last_commit_hash} to {repo.head.commit.hexsha})"
         )
 
-        # List the diffs between last analysed commit and current one
-        diffs = repo.commit(last_commit_hash).diff(repo.head.commit)
+        for commit in commits[::-1]:
+            # List the diffs between last analysed commit and current one
+            diffs = repo.commit(last_commit_hash).diff(commit)
 
-        # Parse the diffs and execute their handler
-        logger.info(f"Parsing {len(diffs)} diffs")
-        for diff in diffs:
-            handler = Handlers(diff)
-            handler.execute()
+            # Parse the diffs and execute their handler
+            logger.info(
+                f"Parsing {len(diffs)} diffs (from {last_commit_hash} to {commit})"
+            )
+            for diff in diffs:
+                handler = Handlers(commit, diff)
+                handler.execute()
 
-        # Save the last know commit
-        Variable.set("last_commit_hash", repo.head.commit)
+            # Save the last know commit
+            last_commit_hash = commit
+            Variable.set("last_commit_hash", last_commit_hash)
 
     # Option 1 - Use the official OpenCVE KB
     if conf.getboolean("opencve", "use_official_kb"):

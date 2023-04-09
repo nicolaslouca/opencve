@@ -2,11 +2,15 @@ import importlib
 import json
 import logging
 import uuid
+import arrow
 
 import arrow
 import pendulum
 from airflow.decorators import dag, task
 from airflow.providers.postgres.operators.postgres import PostgresOperator
+from psycopg2.extras import Json
+from airflow.providers.postgres.hooks.postgres import PostgresHook
+from constants import PROCEDURES
 
 """@dag(
     schedule="0 * * * *",
@@ -28,7 +32,8 @@ logger = logging.getLogger(__name__)
 
 
 class Handlers:
-    def __init__(self, diff):
+    def __init__(self, commit, diff):
+        self.commit = commit
         self.diff = diff
         self._path = None
         self._source = None
@@ -42,6 +47,13 @@ class Handlers:
     @property
     def is_cve(self):
         return self.source in ["nvd"]
+
+    @property
+    def cve_name(self):
+        if not self.is_cve:
+            return None
+        # Example: nvd/2023/CVE-2023-28640.json
+        return self.path.split("/")[2].split(".")[0]
 
     @property
     def source(self):
@@ -58,7 +70,11 @@ class Handlers:
     @property
     def left(self):
         if not self._left:
-            self._left = json.loads(self.diff.a_blob.data_stream.read().decode("utf-8"))
+            self._left = (
+                json.loads(self.diff.a_blob.data_stream.read().decode("utf-8"))
+                if self.diff.a_blob
+                else None
+            )
         return self._left
 
     @property
@@ -75,7 +91,21 @@ class Handlers:
         module = importlib.import_module(f"sources.{self.source}")
         source = getattr(module, f"{self.source.capitalize()}Source")
 
-        if not self.is_new:
-            return source.update(self.path, self.left, self.right)
+        # Update the source
+        source.upsert(self.right)
 
-        return source.upsert(self.path, self.right)
+        # Create the change and its events
+        events = source.get_events(self.left, self.right)
+        if events:
+            parameters = {
+                "cve": self.cve_name,
+                "path": self.path,
+                "commit": str(self.commit),
+                "events": Json(events),
+                "created": arrow.get(self.commit.authored_date).datetime.isoformat(),
+                "updated": arrow.get(self.commit.authored_date).datetime.isoformat(),
+            }
+
+            # Insert in the database
+            hook = PostgresHook(postgres_conn_id="opencve_postgres")
+            hook.run(sql=PROCEDURES.get("events"), parameters=parameters)
