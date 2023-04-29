@@ -173,8 +173,8 @@ Vulnerabilities (CVE)
                         <th>Vendors</th>
                         <th>Products</th>
                         <th class="text-center">Updated</th>
-                        <th class="text-center">CVSS v2</th>
-                        <th class="text-center">CVSS v3</th>
+                        <th class="text-center">CVSS v3.0</th>
+                        <th class="text-center">CVSS v3.1</th>
                         </thead>
                         {% for cve in cves %}
                         <tr class="cve-header">
@@ -182,14 +182,13 @@ Vulnerabilities (CVE)
                             <td class="col-md-3">{{ cve.vendors|vendors_excerpt }}</td>
                             <td class="col-md-3">{{ cve.vendors|products_excerpt }}</td>
                             <td class="col-md-2 text-center">{{ cve.updated_at|date:"Y-m-d" }}</td>
-                            {% if cve.json.impact.baseMetricV2 %}
-                            <td class="col-md-1 text-center"><span class="label {{ cve.json.impact.baseMetricV2.cvssV2.baseScore|cvss_label }}">{{ cve.json.impact.baseMetricV2.cvssV2.baseScore }} {{ cve.json.impact.baseMetricV2.severity }}</span></td>
+                            {% if cve.json.metrics.cvssMetricV30 %}
+                            <td class="col-md-1 text-center"><span class="label {{ cve.json.metrics.cvssMetricV30.0.cvssData.baseScore|cvss_label }}">{{ cve.json.metrics.cvssMetricV30.0.cvssData.baseScore }} {{ cve.json.metrics.cvssMetricV30.0.cvssData.baseSeverity }}</span></td>
                             {% else %}
                             <td class="col-md-1 text-center"><span class="label label-default">N/A</span></td>
                             {% endif %}
-                            {% if cve.json.impact.baseMetricV3 %}
-                            <td class="col-md-1 text-center"><span class="label {{ cve.json.impact.baseMetricV3.cvssV3.baseScore|cvss_label }}">{{ cve.json.impact.baseMetricV3.cvssV3.baseScore }} {{ cve.json.impact.baseMetricV3.cvssV3.baseSeverity }}</span>
-                            </td>
+                            {% if cve.json.metrics.cvssMetricV31 %}
+                            <td class="col-md-1 text-center"><span class="label {{ cve.json.metrics.cvssMetricV31.0.cvssData.baseScore|cvss_label }}">{{ cve.json.metrics.cvssMetricV31.0.cvssData.baseScore }} {{ cve.json.metrics.cvssMetricV31.0.cvssData.baseSeverity }}</span></td>
                             {% else %}
                             <td class="col-md-1 text-center"><span class="label label-default">N/A</span></td>
                             {% endif %}

@@ -14,6 +14,7 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, TemplateView, DeleteView, UpdateView
 
 from core.models import Product, Vendor
+from projects.models import Project
 from users.forms import (
     LoginForm,
     PasswordChangeForm,
@@ -28,7 +29,7 @@ from users.utils import is_valid_uuid
 
 
 def account(request):
-    return redirect("subscriptions")
+    return redirect("tags")
 
 
 class SubscriptionsView(LoginRequiredMixin, TemplateView):
@@ -77,6 +78,15 @@ class SettingsPasswordView(PasswordChangeView):
             f"Your password has been updated.",
         )
         return resp
+
+
+class ProjectsView(LoginRequiredMixin, ListView):
+    context_object_name = "projects"
+    template_name = "users/account/projects.html"
+
+    def get_queryset(self):
+        query = Project.objects.filter(user=self.request.user).all()
+        return query.order_by("-name")
 
 
 class TagsView(LoginRequiredMixin, ListView):

@@ -311,6 +311,10 @@ pre.plainJSON{
   font-size: 14px;
 }
 
+.timeline-inverse>li>.timeline-item {
+    background-color: #f9f9f9;
+}
+
 .box-group > .box-changes {
   border: 1px solid #d2d2d2 !important;
 }
@@ -326,11 +330,15 @@ pre.plainJSON{
 .box-meta {
   float: right;
   color: #757575;
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .box-meta > i {
   margin-left: 20px;
+}
+
+.box-changes .box-title {
+  font-size: 15px;
 }
 
 .change-collapsed[aria-expanded=true] .fa-arrow-circle-o-down {
@@ -346,4 +354,22 @@ pre.plainJSON{
     height: 25px;
     border-radius: 50%;
     margin-right: 10px;
+}
+
+.icon i.fa {
+    font-size: 60px;
+}
+
+.small-box .icon {
+    top: -20px;
+}
+
+.project-header {
+    padding: 35px;
+    text-align: center;
+    margin-left: -1px;
+}
+
+.project-header h3 {
+    color: white;
 }

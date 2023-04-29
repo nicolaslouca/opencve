@@ -83,20 +83,25 @@
                             <img src="{{ user.email | gravatar_url }}" class="img-circle" alt="{{ user.username }}">
                         </div>
                         <div class="pull-left info">
-                            <p>{{ user.username }}</p>
+                            <p>{{ user.username }}</p>
                             <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
                         </div>
                     </div>
                     {% endif %}
         
                     <ul class="sidebar-menu" data-widget="tree">
+                        <li class="header">MAIN NAVIGATION</li>
                         {% if user.is_authenticated %}
                         <li class="{% is_active_link 'home' %}"><a href="{% url 'home' %}"><i class="fa fa-home"></i><span>Dashboard</span></a></li>
                         {% endif %}
-                        <li class="{% is_active_link 'cves' 'cve' 'change' %}"><a href="{% url 'cves' %}"><i class="fa fa-shield"></i> <span>Vulnerabilities (CVE)</span></a></li>
-                        <li class="{% is_active_link 'advisories' %}"><a href="{% url 'advisories' %}"><i class="fa fa-th-list"></i> <span>Advisories</span></a></li>
-                        <li class="{% is_active_link 'vendors' %}"><a href="{% url 'vendors' %}"><i class="fa fa-tags"></i> <span> Vendors & Products (CPE)</span></a></li>
-                        <li class="{% is_active_link 'cwes' %}"><a href="{% url 'cwes' %}"><i class="fa fa-sitemap"></i> <span> Categories (CWE)</span></a></li>
+                        <li class="{% is_active_link 'cves' 'cve' 'change' %}"><a href="{% url 'cves' %}"><i class="fa fa-shield"></i> <span>Vulnerabilities</span></a></li>
+                        <li class="{% is_active_link 'advisories' %}"><a href="{% url 'advisories' %}"><i class="fa fa-bug"></i> <span>Advisories</span></a></li>
+                        <li class="{% is_active_link 'vendors' %}"><a href="{% url 'vendors' %}"><i class="fa fa-th-list"></i> <span> Vendors & Products</span></a></li>
+                        <li class="{% is_active_link 'cwes' %}"><a href="{% url 'cwes' %}"><i class="fa fa-sitemap"></i> <span> Categories</span></a></li>
+                        <li class="header">SETTINGS</li>
+                        <li class="{% is_active_link 'projects' %}"><a href="{% url 'projects' %}"><i class="fa fa-rocket"></i> <span> Projects</span></a></li>
+                        <li class="{% is_active_link 'tags' %}"><a href="{% url 'tags' %}"><i class="fa fa-tags"></i> <span> Tags</span></a></li>
+                        <li class="{% is_active_link 'settings' %}"><a href="{% url 'settings_profile' %}"><i class="fa fa-gear"></i> <span> Settings</span></a></li>
                     </ul>
                 </section>
             </aside>
@@ -106,7 +111,7 @@
             </div>
 
             <footer class="main-footer">
-                <strong>Copyright &copy; 2022 OpenCVE.</strong>
+                <strong>Copyright &copy; 2023 OpenCVE.</strong>
             </footer>
         </div>
 

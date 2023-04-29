@@ -91,10 +91,6 @@ def sources():
         instance.run()
 
     @task
-    def foobar():
-        pass
-
-    @task
     def analyse_changes():
         repo = git.Repo(LOCAL_REPO)
 
@@ -131,25 +127,29 @@ def sources():
             last_commit_hash = commit
             Variable.set("last_commit_hash", last_commit_hash)
 
+    @task
+    def populate_reports():
+        pass
+
     # Option 1 - Use the official OpenCVE KB
     if conf.getboolean("opencve", "use_official_kb"):
-        task_group = git_pull() >> analyse_changes()
+        tasks_group = git_pull() >> analyse_changes()
 
     # Option 2 - Maintain a KB
     else:
 
         # Group all the sources task in a single TaskGroup
-        with TaskGroup(group_id="sources") as sources_gt:
+        with TaskGroup(group_id="check_sources") as sources_gt:
             sources_cls = [s for s in BaseSource.__subclasses__()]
             sources_tasks = []
             for source_cls in sources_cls:
                 foo = update_source.override(task_id=source_cls.name)(source_cls)
                 sources_tasks.append(foo)
 
-        task_group = (git_pull() >> sources_gt >> git_push() >> analyse_changes())
+        tasks_group = (git_pull() >> sources_gt >> git_push() >> analyse_changes())
 
     # To complete
-    task_group >> foobar()
+    tasks_group >> populate_reports()
 
 
 sources()

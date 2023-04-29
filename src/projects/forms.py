@@ -1,7 +1,7 @@
 from django import forms
 
 from core.constants import CVSS_SCORES
-from integrations.models import Integration
+from projects.models import Integration
 
 
 FORM_MAPPING = {

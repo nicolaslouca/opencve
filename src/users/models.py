@@ -4,7 +4,8 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import F
 
-from core.models import BaseModel, Cve, Product, Vendor
+from opencve.models import BaseModel
+from core.models import Cve
 
 
 def get_default_settings():
@@ -13,9 +14,6 @@ def get_default_settings():
 
 class User(BaseModel, AbstractUser):
     settings = models.JSONField(default=get_default_settings)
-
-    vendors = models.ManyToManyField(Vendor)
-    products = models.ManyToManyField(Product)
 
     class Meta:
         db_table = "opencve_users"

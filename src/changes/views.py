@@ -11,6 +11,7 @@ from changes.forms import ActivitiesViewForm
 from changes.models import Change
 from changes.utils import CustomHtmlHTML
 from core.constants import PRODUCT_SEPARATOR
+from projects.models import Project
 
 
 class ActivityPaginator(Paginator):
@@ -61,12 +62,11 @@ class ChangeListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Add the user subscriptions
-        context["vendors"] = self.request.user.get_raw_vendors()
-        context["products"] = self.request.user.get_raw_products()
-
         # Add the user tags
         context["tags"] = self.request.user.tags.all()
+
+        # Add the projects
+        context["projects"] = self.request.user.projects.all().order_by("-updated_at")
 
         # Add the view form
         view = self.request.user.settings["activities_view"]

@@ -1,5 +1,4 @@
 {% load opencve_extras %}
-{% with cvss=cve.json.impact.baseMetricV2.cvssV2 %}
 <div class="row">
     <div class="col-md-4">
         <div class="small-box {{ cvss.baseScore|cvss_bg }}">
@@ -85,4 +84,3 @@
         </div>
     </div>
 </div>
-{% endwith %}

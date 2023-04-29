@@ -3,7 +3,8 @@ import uuid
 
 from django.db import models
 
-from core.models import BaseModel, Cve
+from core.models import Cve
+from opencve.models import BaseModel
 
 
 def get_random_sha256():
@@ -35,12 +36,12 @@ class Change(BaseModel):
 class Event(BaseModel):
     class EventType(models.TextChoices):
         NEW_CVE = "new_cve", "New CVE"
-        FIRST_TIME = "first_time", "Vendors/Products appeared for the first time"
-        REFERENCES = "references", "References changed"
-        CPES = "cpes", "CPEs changed"
+        FIRST_TIME = "first_time", "Vendor(s)/Product(s) appeared for the first time"
+        REFERENCES = "references", "Reference(s) changed"
+        CPES = "cpes", "CPE(s) changed"
         CVSS = "cvss", "CVSS changed"
         SUMMARY = "summary", "Summary changed"
-        CWES = "cwes", "CWEs changed"
+        CWES = "cwes", "CWE(s) changed"
 
     type = models.CharField(
         max_length=10,

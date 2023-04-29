@@ -17,6 +17,33 @@
 <section class="content">
 
     <div class="row">
+        <div class="col-md-3">
+            <div class="box box-solid">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Sources</h3>
+                </div>
+                <div class="box-body no-padding">
+                    <ul class="nav nav-pills nav-stacked">
+                        <li><a href="#"><i class="fa fa-circle-o text-red"></i> DSA</a></li>
+                        <li><a href="#"><i class="fa fa-circle-o text-yellow"></i> JVNDB</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="box box-solid">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Search</h3>
+                </div>
+                <div class="box-body">
+                    <form method="GET">
+                        <div class="form-group">
+                            <input type="text" placeholder="Search" class="form-control" name="search"  value="{% if request.GET.search %}{{ request.GET.search }}{% endif %}">
+                        </div>
+                        <button type="submit" class="btn btn-primary pull-right">Search</button>
+                    </form>
+                </div>
+            </div>
+        </div>
         <div class="col-md-9">
             <div class="box box-primary">
                 <div class="box-body table-responsive no-padding">
@@ -60,32 +87,6 @@
                             <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
                         {% endif %}
                     </span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="box box-primary">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Filters</h3>
-                </div>
-                <div class="box-body">
-                    <form method="GET">
-                        <div class="form-group">
-                            <label>Source</label>
-                            <select class="form-control" name="source">
-                                <option></option>
-                                <option {% if request.GET.source|lower == 'dsa' %} selected="selected" {% endif %}>DSA</option>
-                                <option {% if request.GET.source|lower == 'jvn' %} selected="selected" {% endif %}>JVN</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Search in key</label>
-                            <input type="text" placeholder="Search" class="form-control" name="search"  value="{% if request.GET.search %}{{ request.GET.search }}{% endif %}">
-                        </div>
-                        <button type="submit" class="btn btn-primary pull-right">Search</button>
-                    </form>
                 </div>
             </div>
         </div>

@@ -219,3 +219,8 @@ def is_active_link(context, *args):
     if url_name in args:
         return "active"
     return ""
+
+
+@register.filter
+def split(value, key):
+    return value.split(key)

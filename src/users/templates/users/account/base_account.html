@@ -4,50 +4,56 @@
 
 {% block content %}
 
-<div class="row">
-    <div class="col-sm-12">
-        <div class="profile-picture"
-             style="background-image:url('{% static 'img/deep-green.jpg' %}')">
-            <img src="{{ user.email | gravatar_url:88 }}" class="thumb-lg img-circle img-thumbnail"
-                 alt="profile-image">
-            <h3>{{ user.username }}</h3>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-sm-12">
-        <div class="nav-tabs-custom nav-tabs-profile nav-tabs-primary">
-            <ul class="nav nav-tabs">
-                <li class="{% is_active_link 'subscriptions' %}">
-                    <a href="{% url 'subscriptions' %}">Subscriptions</a>
-                </li>
-                <li class="{% is_active_link 'integrations' 'create_integration' 'update_integration' 'delete_integration' %}">
-                    <a href="{% url 'integrations' %}">Integrations</a>
-                </li>
-                <li class="{% is_active_link 'tags' 'edit_tag' 'delete_tag' %}">
-                    <a href="{% url 'tags' %}">Tags</a>
-                </li>
-                <li class="{% is_active_link 'settings_profile' 'settings_password' %}">
-                    <a href="{% url 'settings_profile' %}">Settings</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</div>
+<section class="content-header">
+    <h1>Vulnerabilities (CVE)</h1>
+    <ol class="breadcrumb">
+        <li><a href="{% url 'home' %}">OpenCVE</a></li>
+        <li class="active">Account</li>
+    </ol>
+</section>
 
 <section class="content">
     <div class="row">
-        <div class="col-md-12">
-            {% if messages %}
-                {% for message in messages %}
-                <div class="alert alert-{{ message.tags}} alert-dismissible fade in">
-                    <button aria-label="Close" data-dismiss="alert" class="close" type="button"><span aria-hidden="true">×</span></button>
-                    <p>{{ message }}</p>
+        <div class="col-md-3">
+            <div class="box box-primary">
+                <div class="box-body box-profile">
+                    <img class="profile-user-img img-responsive img-circle" src="{{ user.email | gravatar_url:88 }}" alt="User profile picture">
+                    <h3 class="profile-username text-center">{{ user.username }}</h3>
+                    <ul class="list-group list-group-unbordered">
+                        <li class="list-group-item"><b>Followers</b> <a class="pull-right">1,322</a></li>
+                        <li class="list-group-item"><b>Following</b> <a class="pull-right">543</a></li>
+                        <li class="list-group-item"><b>Friends</b> <a class="pull-right">13,287</a></li>
+                    </ul>
+                    <a href="#" class="btn btn-primary btn-block"><b>Follow</b></a>
                 </div>
-                {% endfor %}
-            {% endif %}
-            {% block content_account %}{% endblock %}
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="nav-tabs-custom nav-tabs-profile">
+                <ul class="nav nav-tabs">
+                    <li class="{% is_active_link 'projects' %}">
+                        <a href="{% url 'projects' %}">Projects</a>
+                    </li>
+                    <li class="{% is_active_link 'tags' 'edit_tag' 'delete_tag' %}">
+                        <a href="{% url 'tags' %}">Tags</a>
+                    </li>
+                    <li class="{% is_active_link 'settings_profile' 'settings_password' %}">
+                        <a href="{% url 'settings_profile' %}">Settings</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    {% if messages %}
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags}} alert-dismissible fade in">
+                            <button aria-label="Close" data-dismiss="alert" class="close" type="button"><span aria-hidden="true">×</span></button>
+                            <p>{{ message }}</p>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                    {% block content_account %}{% endblock %}
+                </div>
+            </div>
         </div>
     </div>
 </section>

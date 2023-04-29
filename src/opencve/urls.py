@@ -8,6 +8,7 @@ urlpatterns = [
     path("", include("advisories.urls")),
     path("", include("changes.urls")),
     path("", include("core.urls")),
+    path("", include("projects.urls")),
     path("register/", register, name="register"),
     path("account/", include("users.urls")),
     path("login/", CustomLoginView.as_view(), name="login"),

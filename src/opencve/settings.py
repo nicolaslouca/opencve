@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     "advisories",
     "changes",
     "core",
-    "integrations",
+    "projects",
     "users",
 ]
 

@@ -18,7 +18,3 @@ class AdvisoryDetailView(DetailView):
     slug_field = "key"
     slug_url_kwarg = "key"
     template_name = "advisories/advisory_detail.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
