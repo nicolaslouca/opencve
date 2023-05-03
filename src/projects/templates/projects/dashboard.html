@@ -77,6 +77,16 @@
     <div class="col-md-4">
         <div class="box box-primary">
             <div class="box-header">
+                <div class="box-title">Project <strong>{{ project.name }}</strong></div>
+            </div>
+            <div class="box-body">
+                <blockquote>
+                <p>{{ project.description }}</p>
+                </blockquote>
+            </div>
+        </div>
+        <div class="box box-primary">
+            <div class="box-header">
                 <div class="box-title">Subscriptions</div>
                 <div class="box-tools pull-right">
                     <a class="btn btn-box-tool" href="{% url 'subscriptions' name=project.name %}" data-toggle="tooltip" data-container="body" data-placement="left" title="Manage this project subscriptions"><i class="fa fa-gears"></i></a>

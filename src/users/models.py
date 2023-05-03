@@ -3,6 +3,7 @@ from django.contrib.postgres.indexes import GinIndex
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import F
+from django.urls import reverse
 
 from opencve.models import BaseModel
 from core.models import Cve
@@ -89,6 +90,9 @@ class UserTag(BaseModel):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return f"{reverse('cves')}?tag={self.name}"
 
 
 class CveTag(BaseModel):

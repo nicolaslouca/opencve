@@ -17,7 +17,7 @@
         <div class="nav-tabs-custom nav-tabs-profile nav-tabs-primary">
             <ul class="nav nav-tabs">
                 <li class="{% is_active_link 'project' %}">
-                    <a href="{% url 'project' name=project.name %}">Home</a>
+                    <a href="{% url 'project' name=project.name %}">Dashboard</a>
                 </li>
                 <li class="{% is_active_link 'reports' %}">
                     <a href="{% url 'reports' name=project.name %}">Reports</a>
@@ -25,7 +25,7 @@
                 <li class="{% is_active_link 'subscriptions' %}">
                     <a href="{% url 'subscriptions' name=project.name %}">Subscriptions</a>
                 </li>
-                <li class="{% is_active_link 'integrations' 'create_integration' %}">
+                <li class="{% is_active_link 'integrations' 'create_integration' 'edit_integration' %}">
                     <a href="{% url 'integrations' name=project.name %}">Integrations</a>
                 </li>
             </ul>

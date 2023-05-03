@@ -34,7 +34,7 @@
                                 <img src="{% static 'img/'|add:integration.type|add:'.png' %}" alt="{{ integration.type }}" />
                             </div>
                             <div class="product-info">
-                                <a href="{% url 'update_integration' name=project.name integration=integration.name %}" class="product-title">{{ integration.name }} ({{ integration.type }})
+                                <a href="{% url 'edit_integration' name=project.name integration=integration.name %}" class="product-title">{{ integration.name }} ({{ integration.type }})
                                     {% if integration.is_enabled %}
                                     <span class="label label-success pull-right">Enabled</span>
                                     {% else %}

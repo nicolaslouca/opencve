@@ -95,6 +95,10 @@
     border-bottom: 3px solid #2b4049;
   }
 
+  .nav-tabs-account > .tab-content {
+    min-height: 400px;
+  }
+
   .table td.no-bordered {
     border-top: 0;
   }
@@ -365,11 +369,63 @@ pre.plainJSON{
 }
 
 .project-header {
-    padding: 35px;
+    padding: 1px;
     text-align: center;
     margin-left: -1px;
 }
 
 .project-header h3 {
     color: white;
+    margin: 20px 0;
+}
+
+.project-header p {
+    color: white;
+    font-style: italic;
+}
+
+.widget-user .widget-user-header {
+    text-align: center;
+}
+
+.alert.alert-info,
+.callout.callout-info {
+    background-color: #E3F2FF !important;
+    border-color: #478BCA;
+    color: #00315F !important;
+}
+
+.alert.alert-info p,
+.alert.alert-info a,
+.callout.callout-info p,
+.callout.callout-info a{
+    color: #00315F;
+}
+
+.alert.alert-error,
+.callout.callout-error {
+    background-color: #FFEBED !important;
+    border-color: #E13238;
+    color: #4B1113 !important;
+}
+
+.alert.alert-error p,
+.alert.alert-error a,
+.callout.callout-error p,
+.callout.callout-error a{
+    color: #4B1113;
+}
+
+.alert.alert-success,
+.callout.callout-success {
+    background-color: #E6F7E5 !important;
+    border-color: #009400;
+    color: #003100 !important;
+}
+
+.alert.alert-success p,
+.alert.alert-success a,
+.callout.callout-success p,
+.callout.callout-success a{
+    color: #003100;
 }

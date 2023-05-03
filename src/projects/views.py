@@ -4,7 +4,6 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
-from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, CreateView, UpdateView
 
 from changes.models import Change
@@ -27,23 +26,12 @@ def get_default_configuration():
     }
 
 
-class ProjectListView(ListView):
-    context_object_name = "projects"
-    template_name = "projects/project_list.html"
-    paginate_by = 20
-
-    def get_queryset(self):
-        # TODO: retourner les projets du user seulement
-        query = Project.objects.all()
-        return query.order_by("-updated_at")
-
-
 class ProjectDetailView(DetailView):
     #TODO: vérifier que le project appartient bien au user
     model = Project
     slug_field = "name"
     slug_url_kwarg = "name"
-    template_name = "projects/home.html"
+    template_name = "projects/dashboard.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -84,7 +72,7 @@ class IntegrationsView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["integrations"] = Integration.objects.filter(project=self.object).all()
+        context["integrations"] = Integration.objects.filter(project=self.object).order_by('name').all()
         return context
 
 
@@ -109,6 +97,7 @@ class IntegrationViewMixin:
         )
 
     def exists(self, project, name, instance=None):
+        # TODO: l'integration 'add' doit être reservée (conflit url sinon)
         queryset = Integration.objects.filter(project=project, name=name)
         if instance:
             queryset = queryset.filter(~Q(id=instance.id))
@@ -144,7 +133,7 @@ class IntegrationCreateView(IntegrationViewMixin, CreateView):
                 return render(
                     request,
                     self.template_name,
-                    {"form": form, "type": self.get_type()},
+                    {"form": form, "type": self.get_type(), "project": project}
                 )
 
             # List of events
@@ -177,7 +166,7 @@ class IntegrationCreateView(IntegrationViewMixin, CreateView):
             return redirect("integrations", name=project.name)
 
         return render(
-            request, self.template_name, {"form": form, "type": request.GET.get("type")}
+            request, self.template_name, {"form": form, "type": request.GET.get("type"), "project": project}
         )
 
 
@@ -215,7 +204,7 @@ class IntegrationUpdateView(IntegrationViewMixin, UpdateView):
                 return render(
                     request,
                     self.template_name,
-                    {"form": form, "type": self.get_type()},
+                    {"form": form, "type": self.get_type(), "project": project},
                 )
 
             # List of events
@@ -246,5 +235,5 @@ class IntegrationUpdateView(IntegrationViewMixin, UpdateView):
             return redirect("integrations", name=project.name)
 
         return render(
-            request, self.template_name, {"form": form, "type": request.GET.get("type")}
+            request, self.template_name, {"form": form, "type": self.get_type(), "project": project}
         )

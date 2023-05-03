@@ -10,6 +10,7 @@ from django.contrib.auth.forms import (
     UserCreationForm,
 )
 
+from projects.models import Project
 from users.models import User, UserTag
 
 
@@ -90,7 +91,10 @@ class ProfileChangeForm(forms.ModelForm):
             "first_name",
             "last_name",
             "email",
-            Submit("submit", "Change Password", css_class="btn btn-primary"),
+            FormActions(
+                Submit("save", "Save"),
+                css_class="pull-right",
+            ),
         )
 
 
@@ -102,7 +106,13 @@ class PasswordChangeForm(PasswordChangeForm):
             "old_password",
             "new_password1",
             "new_password2",
-            Submit("submit", "Change Password", css_class="btn btn-primary"),
+            FormActions(
+                HTML(
+                    """<a href="{% url 'settings_profile' %}" class="btn btn-default">Cancel</a> """
+                ),
+                Submit("save", "Save"),
+                css_class="pull-right",
+            ),
         )
 
 
@@ -141,25 +151,25 @@ class UserTagForm(forms.ModelForm):
         model = UserTag
         fields = ["name", "description", "color"]
 
-    def __init__(self, user=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request')
         super(UserTagForm, self).__init__(*args, **kwargs)
-        self.user = user
+
         self.helper = FormHelper()
         self.helper.layout = Layout(
             "name",
             "description",
-            Div(
+            FormActions(
                 Field("color", css_class="colorpicker"),
                 Button(
                     "generate",
-                    "Gen",
+                    "Generate",
                     css_class="btn btn-default btn-flat",
                     css_id="genNew",
                 ),
                 HTML(
                     """<span class="label label-tag preview-tag" style="color: #fff; background-color: {{form.color.value}};">preview</span>"""
                 ),
-                css_class="form-inline form-group",
             ),
             FormActions(
                 HTML(
@@ -169,3 +179,62 @@ class UserTagForm(forms.ModelForm):
                 css_class="pull-right",
             ),
         )
+
+    def clean_name(self):
+        name = self.cleaned_data["name"]
+
+        # Check if the tag is not a reserved keyword
+        if name in ("add",):
+            raise forms.ValidationError("This tag is reserved.")
+
+        # In case of update, check if the user tried to change the name
+        if (bool(self.instance.name)) and (self.instance.name != name):
+            raise forms.ValidationError("Existing tags can't be renamed.")
+
+        # Check if the tag already exists for this user
+        if self.instance.name != name:
+            if UserTag.objects.filter(user=self.request.user, name=name).exists():
+                raise forms.ValidationError("This tag already exists.")
+
+        return name
+
+
+class ProjectForm(forms.ModelForm):
+    class Meta:
+        model = Project
+        fields = ["name", "description"]
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request')
+        super(ProjectForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            "name",
+            "description",
+            FormActions(
+                HTML(
+                    """<a href="{% url 'projects' %}" class="btn btn-default">Cancel</a> """
+                ),
+                Submit("save", "Save"),
+                css_class="pull-right",
+            ),
+        )
+
+    def clean_name(self):
+        name = self.cleaned_data["name"]
+
+        # Check if the project is not a reserved keyword
+        if name in ("add",):
+            raise forms.ValidationError("This project is reserved.")
+
+        # In case of update, check if the user tried to change the name
+        if (bool(self.instance.name)) and (self.instance.name != name):
+            raise forms.ValidationError("Existing projects can't be renamed.")
+
+        # Check if the tag already exists for this user
+        if self.instance.name != name:
+            if Project.objects.filter(user=self.request.user, name=name).exists():
+                raise forms.ValidationError("This project already exists.")
+
+        return name

@@ -1,5 +1,3 @@
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit
 from django.contrib import messages
 from django.contrib.auth.views import (
     LoginView,
@@ -11,7 +9,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
-from django.views.generic import ListView, TemplateView, DeleteView, UpdateView
+from django.contrib.messages.views import SuccessMessageMixin
+from django.views.generic import ListView, CreateView, TemplateView, DeleteView, UpdateView
 
 from core.models import Product, Vendor
 from projects.models import Project
@@ -20,6 +19,7 @@ from users.forms import (
     PasswordChangeForm,
     PasswordResetForm,
     ProfileChangeForm,
+    ProjectForm,
     RegisterForm,
     SetPasswordForm,
     UserTagForm,
@@ -29,8 +29,21 @@ from users.utils import is_valid_uuid
 
 
 def account(request):
-    return redirect("tags")
+    return redirect("projects")
 
+
+class RequestViewMixin:
+    def get_form_kwargs(self):
+        """
+        Inject the current request (useful to check the authenticated
+        user in the clean* functions).
+        """
+        kwargs = super(RequestViewMixin, self).get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+
+# TO REMOVE
 
 class SubscriptionsView(LoginRequiredMixin, TemplateView):
     template_name = "users/account/subscriptions.html"
@@ -41,127 +54,105 @@ class SubscriptionsView(LoginRequiredMixin, TemplateView):
         context["products"] = self.request.user.get_raw_products()
         return context
 
-
-class SettingsProfileView(LoginRequiredMixin, UpdateView):
-    model = User
-    fields = ["first_name", "last_name", "email"]
-    template_name = "users/account/settings_profile.html"
-    success_url = reverse_lazy("settings_profile")
-
-    def get_object(self, queryset=None):
-        return self.request.user
-
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        form.helper = FormHelper()
-        form.helper.add_input(Submit("submit", "Update", css_class="btn-primary"))
-        return form
-
-    def form_valid(self, form):
-        resp = super().form_valid(form)
-        messages.success(
-            self.request,
-            f"Your profile has been updated.",
-        )
-        return resp
+# PROJECTS views
 
 
-class SettingsPasswordView(PasswordChangeView):
-    form_class = PasswordChangeForm
-    template_name = "users/account/settings_password.html"
-    success_url = reverse_lazy("settings_password")
-
-    def form_valid(self, form):
-        resp = super().form_valid(form)
-        messages.success(
-            self.request,
-            f"Your password has been updated.",
-        )
-        return resp
-
-
-class ProjectsView(LoginRequiredMixin, ListView):
+class ProjectsListView(LoginRequiredMixin, ListView):
     context_object_name = "projects"
     template_name = "users/account/projects.html"
 
     def get_queryset(self):
         query = Project.objects.filter(user=self.request.user).all()
-        return query.order_by("-name")
+        return query.order_by("name")
 
 
-class TagsView(LoginRequiredMixin, ListView):
+class ProjectCreateView(LoginRequiredMixin, SuccessMessageMixin, RequestViewMixin, CreateView):
+    model = Project
+    form_class = ProjectForm
+    template_name = "users/account/project_create_update.html"
+    success_message = "The project has been successfully created."
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+
+class ProjectEditView(LoginRequiredMixin, SuccessMessageMixin, RequestViewMixin, UpdateView):
+    model = Project
+    form_class = ProjectForm
+    template_name = "users/account/project_create_update.html"
+    success_url = reverse_lazy("projects")
+    success_message = "The project has been successfully updated."
+    slug_field = "name"
+    slug_url_kwarg = "name"
+    context_object_name = "project"
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(Project, user=self.request.user, name=self.kwargs["name"])
+
+    def get_form(self, form_class=None):
+        form = super(ProjectEditView, self).get_form()
+        form.fields["name"].disabled = True
+        return form
+
+
+class ProjectDeleteView(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
+    model = Project
+    slug_field = "name"
+    slug_url_kwarg = "name"
+    template_name = "users/account/delete_project.html"
+    success_message = "The project has been deleted."
+    success_url = reverse_lazy("projects")
+
+
+# TAGS views
+
+
+class TagsListView(LoginRequiredMixin, ListView):
     context_object_name = "tags"
     template_name = "users/account/tags.html"
 
     def get_queryset(self):
         query = UserTag.objects.filter(user=self.request.user).all()
-        return query.order_by("-name")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        # Create or edit mode
-        if self.request.resolver_match.url_name == "tags":
-            mode = "create"
-            form = UserTagForm()
-        else:
-            tag = get_object_or_404(
-                UserTag, user=self.request.user, name=self.kwargs["name"]
-            )
-            mode = "update"
-            form = UserTagForm(instance=tag)
-            form.fields["name"].disabled = True
-
-        context["form"] = form
-        context["mode"] = mode
-        return context
-
-    def post(self, request, *args, **kwargs):
-        if request.resolver_match.url_name == "tags":
-            form = UserTagForm(request.user, request.POST)
-        else:
-            tag = get_object_or_404(UserTag, user=request.user, name=kwargs["name"])
-            form = UserTagForm(request.user, request.POST, instance=tag)
-            form.fields["name"].disabled = True
-
-        if form.is_valid():
-
-            # In case of new tag, check if the name is unique
-            if request.resolver_match.url_name == "tags":
-                if UserTag.objects.filter(
-                    user=request.user, name=form.cleaned_data["name"]
-                ).exists():
-                    messages.error(request, "This tag already exists.")
-                    return render(
-                        request,
-                        self.template_name,
-                        {"form": form, "tags": self.get_queryset()},
-                    )
-
-            # Save or update the tag
-            tag = form.save(commit=False)
-            tag.user = self.request.user
-            tag.save()
-            messages.success(
-                self.request, f"The tag {tag.name} has been successfully saved."
-            )
-            return redirect("edit_tag", name=tag.name)
-
-        return render(
-            request, self.template_name, {"form": form, "tags": self.get_queryset()}
-        )
+        return query.order_by("name")
 
 
-class TagDeleteView(LoginRequiredMixin, DeleteView):
+class TagCreateView(LoginRequiredMixin, SuccessMessageMixin, RequestViewMixin, CreateView):
+    form_class = UserTagForm
+    template_name = "users/account/tag_create_update.html"
+    success_url = reverse_lazy("tags")
+    success_message = "The tag has been successfully created."
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+
+class TagEditView(LoginRequiredMixin, SuccessMessageMixin, RequestViewMixin, UpdateView):
+    model = UserTag
+    form_class = UserTagForm
+    template_name = "users/account/tag_create_update.html"
+    success_url = reverse_lazy("tags")
+    success_message = "The tag has been successfully updated."
+    slug_field = "name"
+    slug_url_kwarg = "name"
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(UserTag, user=self.request.user, name=self.kwargs["name"])
+
+    def get_form(self, form_class=None):
+        form = super(TagEditView, self).get_form()
+        form.fields["name"].disabled = True
+        return form
+
+
+class TagDeleteView(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
     model = UserTag
     slug_field = "name"
     slug_url_kwarg = "name"
     template_name = "users/account/delete_tag.html"
-
-    def get_success_url(self):
-        obj = self.get_object()
-        messages.success(self.request, f"The tag {obj.name} has been deleted.")
-        return reverse("tags")
+    success_message = "The tag has been deleted."
+    success_url = reverse_lazy("tags")
 
     def get(self, request, *args, **kwargs):
         count = CveTag.objects.filter(
@@ -174,6 +165,25 @@ class TagDeleteView(LoginRequiredMixin, DeleteView):
             )
             return redirect("tags")
         return super().get(request, *args, **kwargs)
+
+
+# PROFILE views
+
+class SettingsProfileView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+    form_class = ProfileChangeForm
+    template_name = "users/account/settings_profile.html"
+    success_url = reverse_lazy("settings_profile")
+    success_message = "Your profile has been updated."
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+
+class SettingsPasswordView(LoginRequiredMixin, SuccessMessageMixin, PasswordChangeView):
+    form_class = PasswordChangeForm
+    template_name = "users/account/settings_password.html"
+    success_url = reverse_lazy("settings_password")
+    success_message = "Your password has been updated."
 
 
 class CustomLoginView(LoginView):

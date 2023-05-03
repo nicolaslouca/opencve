@@ -16,7 +16,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/custom.css' %}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
     </head>
-    <body class="hold-transition skin-blue skin-opencve sidebar-mini sidebar-collapse">
+    <body class="hold-transition skin-blue skin-opencve sidebar-mini">
     {% load opencve_extras %}
 
         <div class="wrapper">
@@ -38,29 +38,11 @@
                     <div class="navbar-custom-menu">
                         <ul class="nav navbar-nav">
                             {% if user.is_authenticated %}
-                            <li class="dropdown user user-menu">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <li class="user user-menu">
+                                <a href="{% url 'settings_profile' %}">
                                     <img src="{{ user.email | gravatar_url:30 }}" class="user-image" alt="User Image">
                                     <span class="hidden-xs">{{ user.username }}</span>
                                 </a>
-                                <ul class="dropdown-menu">
-                                    <li class="user-header">
-                                        <img src="{{ user.email | gravatar_url:160 }}" class="img-circle"
-                                             alt="{{ user.username }}">
-                                        <p>{{ user.username }}</p>
-                                    </li>
-                                    <li class="user-footer">
-                                        <div class="pull-left">
-                                            <a href="{% url 'account' %}" class="btn btn-default btn-flat">Account</a>
-                                            {% if user.is_superuser %}
-                                            <a href="{% url 'admin:index' %}" class="btn btn-default btn-flat">Admin</a>
-                                            {% endif %}
-                                        </div>
-                                        <div class="pull-right">
-                                            <a href="{% url 'logout' %}" class="btn btn-default btn-flat">Sign out</a>
-                                        </div>
-                                    </li>
-                                </ul>
                             </li>
                             {% else %}
                             <li class="hidden-xs">
@@ -98,10 +80,16 @@
                         <li class="{% is_active_link 'advisories' %}"><a href="{% url 'advisories' %}"><i class="fa fa-bug"></i> <span>Advisories</span></a></li>
                         <li class="{% is_active_link 'vendors' %}"><a href="{% url 'vendors' %}"><i class="fa fa-th-list"></i> <span> Vendors & Products</span></a></li>
                         <li class="{% is_active_link 'cwes' %}"><a href="{% url 'cwes' %}"><i class="fa fa-sitemap"></i> <span> Categories</span></a></li>
+                        {% if user.is_authenticated %}
                         <li class="header">SETTINGS</li>
-                        <li class="{% is_active_link 'projects' %}"><a href="{% url 'projects' %}"><i class="fa fa-rocket"></i> <span> Projects</span></a></li>
+                        <li class="{% is_active_link 'projects' 'create_project' 'edit_project' 'delete_project' 'project' 'integrations' 'create_integration' 'edit_integration' 'reports' 'subscriptions' %}"><a href="{% url 'projects' %}"><i class="fa fa-rocket"></i> <span> Projects</span></a></li>
                         <li class="{% is_active_link 'tags' %}"><a href="{% url 'tags' %}"><i class="fa fa-tags"></i> <span> Tags</span></a></li>
-                        <li class="{% is_active_link 'settings' %}"><a href="{% url 'settings_profile' %}"><i class="fa fa-gear"></i> <span> Settings</span></a></li>
+                        <li class="{% is_active_link 'settings_profile' 'settings_password' %}"><a href="{% url 'settings_profile' %}"><i class="fa fa-user"></i> <span> Profile</span></a></li>
+                        {% if user.is_superuser %}
+                        <li><a href="{% url 'admin:index' %}"><i class="fa fa-gear"></i> <span> Admin</span></a></li>
+                        {% endif %}
+                        <li><a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i> <span> Logout</span></a></li>
+                        {% endif %}
                     </ul>
                 </section>
             </aside>

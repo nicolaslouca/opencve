@@ -2,6 +2,7 @@ import importlib
 
 from django.core.validators import RegexValidator
 from django.db import models
+from django.urls import reverse
 
 from opencve.models import BaseModel
 from users.models import User
@@ -9,18 +10,26 @@ from projects.utils import get_default_configuration
 
 
 class Project(BaseModel):
-    name = models.CharField(max_length=256, blank=True, null=True)
+    name = models.CharField(max_length=256) #TODO: add a regex constraint
     description = models.TextField(blank=True, null=True)
 
     # Relationships
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="projects")
-    subscriptions = models.JSONField(default=dict)
+    subscriptions = models.JSONField(default=dict(vendors=[], products=[]))
 
     class Meta:
         db_table = "opencve_projects"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name", "user_id"], name="ix_unique_projects"
+            )
+        ]
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse("project", kwargs={"name": self.name})
 
     @property
     def subscriptions_count(self):

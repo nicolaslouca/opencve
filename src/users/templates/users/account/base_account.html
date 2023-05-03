@@ -5,7 +5,7 @@
 {% block content %}
 
 <section class="content-header">
-    <h1>Vulnerabilities (CVE)</h1>
+    <h1>Settings</h1>
     <ol class="breadcrumb">
         <li><a href="{% url 'home' %}">OpenCVE</a></li>
         <li class="active">Account</li>
@@ -15,42 +15,66 @@
 <section class="content">
     <div class="row">
         <div class="col-md-3">
-            <div class="box box-primary">
-                <div class="box-body box-profile">
-                    <img class="profile-user-img img-responsive img-circle" src="{{ user.email | gravatar_url:88 }}" alt="User profile picture">
-                    <h3 class="profile-username text-center">{{ user.username }}</h3>
-                    <ul class="list-group list-group-unbordered">
-                        <li class="list-group-item"><b>Followers</b> <a class="pull-right">1,322</a></li>
-                        <li class="list-group-item"><b>Following</b> <a class="pull-right">543</a></li>
-                        <li class="list-group-item"><b>Friends</b> <a class="pull-right">13,287</a></li>
-                    </ul>
-                    <a href="#" class="btn btn-primary btn-block"><b>Follow</b></a>
+            <div class="box box-widget widget-user">
+                <div class="widget-user-header bg-primary">
+                    <h3 class="widget-user-username">{{ user.username }}</h3>
                 </div>
+                <div class="widget-user-image">
+                    <img class="img-circle" src="{{ user.email | gravatar_url:88 }}" alt="User Avatar">
+                </div>
+                <div class="box-footer">
+                    <div class="row">
+                        <div class="col-md-6 border-right">
+                            <div class="description-block">
+                                <h5 class="description-header">3,200</h5>
+                                <span class="description-text">SALES</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="description-block">
+                                <h5 class="description-header">13,000</h5>
+                                <span class="description-text">FOLLOWERS</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box box-solid">
+                <div class="box-body no-padding">
+                    <ul class="nav nav-pills nav-stacked">
+                        <li><a href="{% url 'create_project' %}"><i class="fa fa-plus"></i> New Project</a></li>
+                        <li><a href="{% url 'create_tag' %}"><i class="fa fa-plus"></i> New Tag</a></li>
+                    </ul>
+                </div>
+
             </div>
         </div>
 
         <div class="col-md-9">
-            <div class="nav-tabs-custom nav-tabs-profile">
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags}} alert-dismissible fade in">
+                <button aria-label="Close" data-dismiss="alert" class="close" type="button"><span
+                        aria-hidden="true">×</span></button>
+                <p>{{ message }}</p>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <div class="nav-tabs-custom nav-tabs-primary nav-tabs-account">
                 <ul class="nav nav-tabs">
-                    <li class="{% is_active_link 'projects' %}">
+                    <li class="{% is_active_link 'projects' 'create_project' 'edit_project' 'delete_project' %}">
                         <a href="{% url 'projects' %}">Projects</a>
                     </li>
-                    <li class="{% is_active_link 'tags' 'edit_tag' 'delete_tag' %}">
+                    <li class="{% is_active_link 'tags' 'create_tag' 'edit_tag' 'delete_tag' %}">
                         <a href="{% url 'tags' %}">Tags</a>
                     </li>
                     <li class="{% is_active_link 'settings_profile' 'settings_password' %}">
-                        <a href="{% url 'settings_profile' %}">Settings</a>
+                        <a href="{% url 'settings_profile' %}">Profile</a>
                     </li>
                 </ul>
                 <div class="tab-content">
-                    {% if messages %}
-                        {% for message in messages %}
-                        <div class="alert alert-{{ message.tags}} alert-dismissible fade in">
-                            <button aria-label="Close" data-dismiss="alert" class="close" type="button"><span aria-hidden="true">×</span></button>
-                            <p>{{ message }}</p>
-                        </div>
-                        {% endfor %}
-                    {% endif %}
                     {% block content_account %}{% endblock %}
                 </div>
             </div>
