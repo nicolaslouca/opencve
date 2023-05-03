@@ -1,6 +1,6 @@
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit, Button, Div, Field, HTML
 from crispy_forms.bootstrap import FormActions
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import HTML, Button, Div, Field, Layout, Submit
 from django import forms
 from django.contrib.auth.forms import (
     AuthenticationForm,
@@ -152,7 +152,7 @@ class UserTagForm(forms.ModelForm):
         fields = ["name", "description", "color"]
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request')
+        self.request = kwargs.pop("request")
         super(UserTagForm, self).__init__(*args, **kwargs)
 
         self.helper = FormHelper()
@@ -205,7 +205,7 @@ class ProjectForm(forms.ModelForm):
         fields = ["name", "description"]
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request')
+        self.request = kwargs.pop("request")
         super(ProjectForm, self).__init__(*args, **kwargs)
 
         self.helper = FormHelper()

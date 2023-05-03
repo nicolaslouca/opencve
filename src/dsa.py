@@ -4,8 +4,8 @@ import arrow
 import requests
 from bs4 import BeautifulSoup, SoupStrainer
 
-from core.management.commands import BaseCommand
 from advisories.models import Advisory
+from core.management.commands import BaseCommand
 
 
 class Command(BaseCommand):

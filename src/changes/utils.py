@@ -82,9 +82,7 @@ class CveUtil(object):
         for cwe in cwes:
             _, created = Cwe.objects.get_or_create(cwe_id=cwe)
             if created:
-                logger.info(
-                    f"New CVE {cwe} added (detected in {cve.cve_id})"
-                )
+                logger.info(f"New CVE {cwe} added (detected in {cve.cve_id})")
 
         # Add the vendors and their products
         vendors_products = convert_cpes(
@@ -93,9 +91,7 @@ class CveUtil(object):
         for vendor, products in vendors_products.items():
             v_obj, created = Vendor.objects.get_or_create(name=vendor)
             if created:
-                logger.info(
-                    f"New vendor {vendor} added (detected in {cve.cve_id})"
-                )
+                logger.info(f"New vendor {vendor} added (detected in {cve.cve_id})")
 
             for product in products:
                 _, created = Product.objects.get_or_create(name=product, vendor=v_obj)

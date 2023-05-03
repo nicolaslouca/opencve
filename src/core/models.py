@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 
-from django.contrib.postgres.indexes import GinIndex, OpClass
 from django.conf import settings
+from django.contrib.postgres.indexes import GinIndex, OpClass
 from django.db import models
 from django.db.models.functions import Upper
 

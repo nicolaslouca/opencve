@@ -1,7 +1,6 @@
 import requests
-from requests.exceptions import HTTPError, RequestException
-
 from integrations.plugins import BaseIntegration
+from requests.exceptions import HTTPError, RequestException
 
 
 class WebhookIntegration(BaseIntegration):

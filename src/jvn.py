@@ -4,8 +4,8 @@ import arrow
 import requests
 from bs4 import BeautifulSoup, SoupStrainer
 
-from core.management.commands import BaseCommand
 from advisories.models import Advisory
+from core.management.commands import BaseCommand
 
 
 class Command(BaseCommand):
@@ -23,9 +23,7 @@ class Command(BaseCommand):
         self.info(self.style.MIGRATE_HEADING("Importing JVN data..."))
         with self.timed_operation(f"Downloading and parsing {url}..."):
             response = requests.get(url)
-            soup = BeautifulSoup(
-                response.content, features="html.parser"
-            )
+            soup = BeautifulSoup(response.content, features="html.parser")
             dls = soup.find_all("dl")
             for dl in dls:
                 dt_text = dl.find("dt").text.strip()
@@ -33,15 +31,17 @@ class Command(BaseCommand):
                 date = arrow.get(dt_text.split()[0], "YYYY/MM/DD").datetime
 
                 link = dd.find("a")["href"]
-                advisories.append(Advisory(
-                    source="jvn",
-                    key=dt_text.split()[1].split(":")[0],
-                    title=dd.text,
-                    text="to complete",
-                    created_at=date,
-                    updated_at=date,
-                    extras={}
-                ))
+                advisories.append(
+                    Advisory(
+                        source="jvn",
+                        key=dt_text.split()[1].split(":")[0],
+                        title=dd.text,
+                        text="to complete",
+                        created_at=date,
+                        updated_at=date,
+                        extras={},
+                    )
+                )
 
         Advisory.objects.bulk_create(advisories)
         self.info(

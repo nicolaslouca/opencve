@@ -5,12 +5,12 @@ from django.db import models
 from django.urls import reverse
 
 from opencve.models import BaseModel
-from users.models import User
 from projects.utils import get_default_configuration
+from users.models import User
 
 
 class Project(BaseModel):
-    name = models.CharField(max_length=256) #TODO: add a regex constraint
+    name = models.CharField(max_length=256)  # TODO: add a regex constraint
     description = models.TextField(blank=True, null=True)
 
     # Relationships

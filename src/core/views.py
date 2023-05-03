@@ -1,7 +1,7 @@
-from hashlib import new
 import itertools
 import json
 import operator
+from hashlib import new
 
 from django.core.paginator import Paginator
 from django.db.models import F, Q

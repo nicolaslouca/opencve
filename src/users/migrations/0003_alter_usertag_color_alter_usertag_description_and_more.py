@@ -5,25 +5,41 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0002_usertag_cvetag_usertag_ix_unique_name_userid_and_more'),
+        ("users", "0002_usertag_cvetag_usertag_ix_unique_name_userid_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='usertag',
-            name='color',
-            field=models.CharField(default='#000000', max_length=7, validators=[django.core.validators.RegexValidator(message='Color must be in hexadecimal format', regex='^#[0-9a-fA-F]{6}$')]),
+            model_name="usertag",
+            name="color",
+            field=models.CharField(
+                default="#000000",
+                max_length=7,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        message="Color must be in hexadecimal format",
+                        regex="^#[0-9a-fA-F]{6}$",
+                    )
+                ],
+            ),
         ),
         migrations.AlterField(
-            model_name='usertag',
-            name='description',
+            model_name="usertag",
+            name="description",
             field=models.CharField(blank=True, max_length=512, null=True),
         ),
         migrations.AlterField(
-            model_name='usertag',
-            name='name',
-            field=models.CharField(max_length=64, validators=[django.core.validators.RegexValidator(message='Only alphanumeric, dash and underscore characters are accepted', regex='^[a-zA-Z0-9\\-_]+$')]),
+            model_name="usertag",
+            name="name",
+            field=models.CharField(
+                max_length=64,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        message="Only alphanumeric, dash and underscore characters are accepted",
+                        regex="^[a-zA-Z0-9\\-_]+$",
+                    )
+                ],
+            ),
         ),
     ]

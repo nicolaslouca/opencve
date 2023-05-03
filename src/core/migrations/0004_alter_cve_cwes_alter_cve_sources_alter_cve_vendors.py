@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0003_remove_cve_json_alter_cve_cwes_alter_cve_summary_and_more"),
     ]

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("changes", "0002_remove_change_task_change_commit_change_path"),
     ]

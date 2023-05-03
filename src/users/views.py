@@ -1,16 +1,22 @@
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import (
     LoginView,
     PasswordChangeView,
     PasswordResetConfirmView,
     PasswordResetView,
 )
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
-from django.contrib.messages.views import SuccessMessageMixin
-from django.views.generic import ListView, CreateView, TemplateView, DeleteView, UpdateView
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
 
 from core.models import Product, Vendor
 from projects.models import Project
@@ -24,7 +30,7 @@ from users.forms import (
     SetPasswordForm,
     UserTagForm,
 )
-from users.models import CveTag, UserTag, User
+from users.models import CveTag, User, UserTag
 from users.utils import is_valid_uuid
 
 
@@ -39,11 +45,12 @@ class RequestViewMixin:
         user in the clean* functions).
         """
         kwargs = super(RequestViewMixin, self).get_form_kwargs()
-        kwargs['request'] = self.request
+        kwargs["request"] = self.request
         return kwargs
 
 
 # TO REMOVE
+
 
 class SubscriptionsView(LoginRequiredMixin, TemplateView):
     template_name = "users/account/subscriptions.html"
@@ -53,6 +60,7 @@ class SubscriptionsView(LoginRequiredMixin, TemplateView):
         context["vendors"] = self.request.user.get_raw_vendors()
         context["products"] = self.request.user.get_raw_products()
         return context
+
 
 # PROJECTS views
 
@@ -66,7 +74,9 @@ class ProjectsListView(LoginRequiredMixin, ListView):
         return query.order_by("name")
 
 
-class ProjectCreateView(LoginRequiredMixin, SuccessMessageMixin, RequestViewMixin, CreateView):
+class ProjectCreateView(
+    LoginRequiredMixin, SuccessMessageMixin, RequestViewMixin, CreateView
+):
     model = Project
     form_class = ProjectForm
     template_name = "users/account/project_create_update.html"
@@ -77,7 +87,9 @@ class ProjectCreateView(LoginRequiredMixin, SuccessMessageMixin, RequestViewMixi
         return super().form_valid(form)
 
 
-class ProjectEditView(LoginRequiredMixin, SuccessMessageMixin, RequestViewMixin, UpdateView):
+class ProjectEditView(
+    LoginRequiredMixin, SuccessMessageMixin, RequestViewMixin, UpdateView
+):
     model = Project
     form_class = ProjectForm
     template_name = "users/account/project_create_update.html"
@@ -88,7 +100,9 @@ class ProjectEditView(LoginRequiredMixin, SuccessMessageMixin, RequestViewMixin,
     context_object_name = "project"
 
     def get_object(self, queryset=None):
-        return get_object_or_404(Project, user=self.request.user, name=self.kwargs["name"])
+        return get_object_or_404(
+            Project, user=self.request.user, name=self.kwargs["name"]
+        )
 
     def get_form(self, form_class=None):
         form = super(ProjectEditView, self).get_form()
@@ -117,7 +131,9 @@ class TagsListView(LoginRequiredMixin, ListView):
         return query.order_by("name")
 
 
-class TagCreateView(LoginRequiredMixin, SuccessMessageMixin, RequestViewMixin, CreateView):
+class TagCreateView(
+    LoginRequiredMixin, SuccessMessageMixin, RequestViewMixin, CreateView
+):
     form_class = UserTagForm
     template_name = "users/account/tag_create_update.html"
     success_url = reverse_lazy("tags")
@@ -128,7 +144,9 @@ class TagCreateView(LoginRequiredMixin, SuccessMessageMixin, RequestViewMixin, C
         return super().form_valid(form)
 
 
-class TagEditView(LoginRequiredMixin, SuccessMessageMixin, RequestViewMixin, UpdateView):
+class TagEditView(
+    LoginRequiredMixin, SuccessMessageMixin, RequestViewMixin, UpdateView
+):
     model = UserTag
     form_class = UserTagForm
     template_name = "users/account/tag_create_update.html"
@@ -138,7 +156,9 @@ class TagEditView(LoginRequiredMixin, SuccessMessageMixin, RequestViewMixin, Upd
     slug_url_kwarg = "name"
 
     def get_object(self, queryset=None):
-        return get_object_or_404(UserTag, user=self.request.user, name=self.kwargs["name"])
+        return get_object_or_404(
+            UserTag, user=self.request.user, name=self.kwargs["name"]
+        )
 
     def get_form(self, form_class=None):
         form = super(TagEditView, self).get_form()
@@ -168,6 +188,7 @@ class TagDeleteView(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
 
 
 # PROFILE views
+
 
 class SettingsProfileView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     form_class = ProfileChangeForm

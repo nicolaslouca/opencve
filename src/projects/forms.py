@@ -3,20 +3,14 @@ from django import forms
 from core.constants import CVSS_SCORES
 from projects.models import Integration
 
-
-FORM_MAPPING = {
-    "slack": ["url"],
-    "webhook": ["url", "headers"]
-}
+FORM_MAPPING = {"slack": ["url"], "webhook": ["url", "headers"]}
 
 
 class IntegrationForm(forms.ModelForm):
     class Meta:
         model = Integration
         fields = ["name", "is_enabled", "has_report"]
-        labels = {
-            "has_report": "Enable the daily report"
-        }
+        labels = {"has_report": "Enable the daily report"}
 
     # Custom fields used for the configuration
     new_cve = forms.BooleanField(required=False)
@@ -48,4 +42,3 @@ class SlackForm(IntegrationForm):
 class WebhookForm(IntegrationForm):
     url = forms.URLField()
     headers = forms.JSONField(required=False, initial={})
-

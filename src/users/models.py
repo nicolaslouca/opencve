@@ -5,8 +5,8 @@ from django.db import models
 from django.db.models import F
 from django.urls import reverse
 
-from opencve.models import BaseModel
 from core.models import Cve
+from opencve.models import BaseModel
 
 
 def get_default_settings():
