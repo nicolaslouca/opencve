@@ -94,9 +94,13 @@ class Cve(BaseModel):
 
     @property
     def json(self):
-        source_path = self.sources[next(iter(self.sources))]
         if len(self.sources) > 1 and "nvd" in self.sources:
             source_path = self.sources.get("nvd")
+        else:
+            try:
+                source_path = self.sources[next(iter(self.sources))]
+            except StopIteration:
+                return {}
 
         path = Path(f"{settings.LOCAL_REPO_PATH}") / Path(source_path)
         with open(path) as f:

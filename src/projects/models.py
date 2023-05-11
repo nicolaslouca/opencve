@@ -9,13 +9,17 @@ from projects.utils import get_default_configuration
 from users.models import User
 
 
+def get_default_subscriptions():
+    return dict(vendors=[], products=[])
+
+
 class Project(BaseModel):
     name = models.CharField(max_length=256)  # TODO: add a regex constraint
     description = models.TextField(blank=True, null=True)
 
     # Relationships
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="projects")
-    subscriptions = models.JSONField(default=dict(vendors=[], products=[]))
+    subscriptions = models.JSONField(default=get_default_subscriptions)
 
     class Meta:
         db_table = "opencve_projects"
