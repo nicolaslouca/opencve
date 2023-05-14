@@ -26,11 +26,15 @@ def get_default_configuration():
     }
 
 
-class ProjectDetailView(DetailView):
-    # TODO: vérifier que le project appartient bien au user
+class ProjectMixin(LoginRequiredMixin):
+    def get_object(self, queryset=None):
+        return get_object_or_404(
+            self.model, user=self.request.user, name=self.kwargs["name"]
+        )
+
+
+class ProjectDetailView(ProjectMixin, DetailView):
     model = Project
-    slug_field = "name"
-    slug_url_kwarg = "name"
     template_name = "projects/dashboard.html"
 
     def get_context_data(self, **kwargs):
@@ -49,27 +53,19 @@ class ProjectDetailView(DetailView):
         return context
 
 
-class ReportsView(DetailView):
-    # TODO: vérifier que le project appartient bien au user
+class ReportsView(ProjectMixin, DetailView):
+    # TODO: use a ListView when reports model will be available
     model = Project
-    slug_field = "name"
-    slug_url_kwarg = "name"
     template_name = "projects/reports.html"
 
 
-class SubscriptionsView(DetailView):
-    # TODO: vérifier que le project appartient bien au user
+class SubscriptionsView(ProjectMixin, DetailView):
     model = Project
-    slug_field = "name"
-    slug_url_kwarg = "name"
     template_name = "projects/subscriptions.html"
 
 
-class IntegrationsView(LoginRequiredMixin, DetailView):
-    # TODO: vérifier que le project appartient bien au user
+class IntegrationsView(ProjectMixin, DetailView):
     model = Project
-    slug_field = "name"
-    slug_url_kwarg = "name"
     template_name = "projects/integrations/list.html"
 
     def get_context_data(self, **kwargs):
@@ -80,7 +76,8 @@ class IntegrationsView(LoginRequiredMixin, DetailView):
         return context
 
 
-class IntegrationViewMixin:
+class IntegrationViewMixin(ProjectMixin):
+    model = Project
     template_name = "projects/integrations/save.html"
 
     def get_type(self):
@@ -88,7 +85,9 @@ class IntegrationViewMixin:
 
     def get_context_data(self, **kwargs):
         # TODO: vérifier que le projet appartient bien au user
-        project = get_object_or_404(Project, name=self.kwargs["name"])
+        project = get_object_or_404(
+            Project, user=self.request.user, name=self.kwargs["name"]
+        )
         return {
             **super(IntegrationViewMixin, self).get_context_data(**kwargs),
             **{"project": project, "type": self.request.GET.get("type")},
@@ -119,18 +118,21 @@ class IntegrationCreateView(IntegrationViewMixin, CreateView):
     def get_type(self):
         return self.request.GET.get("type")
 
+    def get_object(self, queryset=None):
+        return get_object_or_404(
+            Project, user=self.request.user, name=self.kwargs["name"]
+        )
+
     def get(self, request, *args, **kwargs):
         if request.GET.get("type") not in ["email", "webhook", "slack"]:
-            project = get_object_or_404(Project, name=self.kwargs["name"])
+            project = get_object_or_404(Project, name=self.kwargs["name"], user=self.request.user)
             return redirect("integrations", name=project.name)
 
         return super(IntegrationCreateView, self).get(request)
 
     def post(self, request, *args, **kwargs):
         form = self.get_form_class()(request.POST)
-
-        # TODO: vérifier que c'est bien au user
-        project = get_object_or_404(Project, name=self.kwargs["name"])
+        project = get_object_or_404(Project, name=self.kwargs["name"], user=self.request.user)
 
         if form.is_valid():
             if self.exists(project, form.cleaned_data["name"]):
@@ -181,11 +183,11 @@ class IntegrationUpdateView(IntegrationViewMixin, UpdateView):
         return self.object.type
 
     def get_object(self, queryset=None):
-        # TODO: vérifier que c'est bien au user
         return get_object_or_404(
             Integration,
             name=self.kwargs["integration"],
             project__name=self.kwargs["name"],
+            project__user=self.request.user
         )
 
     def get_context_data(self, **kwargs):
@@ -204,10 +206,9 @@ class IntegrationUpdateView(IntegrationViewMixin, UpdateView):
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        form = self.get_form_class()(request.POST, instance=self.object)
 
-        # TODO: vérifier que c'est bien au user
-        project = get_object_or_404(Project, name=self.kwargs["name"])
+        form = self.get_form_class()(request.POST, instance=self.object)
+        project = get_object_or_404(Project, name=self.kwargs["name"], user=self.request.user)
 
         if form.is_valid():
             if self.exists(project, form.cleaned_data["name"], self.object):
@@ -249,3 +250,4 @@ class IntegrationUpdateView(IntegrationViewMixin, UpdateView):
             self.template_name,
             {"form": form, "type": self.get_type(), "project": project},
         )
+

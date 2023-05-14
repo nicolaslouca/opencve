@@ -118,6 +118,11 @@ class ProjectDeleteView(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
     success_message = "The project has been deleted."
     success_url = reverse_lazy("projects")
 
+    def get_object(self, queryset=None):
+        return get_object_or_404(
+            Project, user=self.request.user, name=self.kwargs["name"]
+        )
+
 
 # TAGS views
 
@@ -184,7 +189,13 @@ class TagDeleteView(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
                 f"The tag {kwargs['name']} is still associated to {count} CVE(s), detach them before removing the tag.",
             )
             return redirect("tags")
+
         return super().get(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(
+            UserTag, user=self.request.user, name=self.kwargs["name"]
+        )
 
 
 # PROFILE views

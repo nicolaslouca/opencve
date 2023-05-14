@@ -23,6 +23,7 @@ celerybeat-schedule.db
 # Tests and coverage
 .coverage
 htmlcov/
+.pytest_cache/
 
 # Airflow
 scheduler/logs/
