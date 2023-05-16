@@ -15,7 +15,6 @@ from users.views import (
     TagEditView,
     TagsListView,
     account,
-    subscribe,
 )
 
 urlpatterns = [
@@ -35,7 +34,6 @@ urlpatterns = [
     path("password/", SettingsPasswordView.as_view(), name="settings_password"),
     path("password_reset/", CustomPasswordResetView.as_view(), name="password_reset"),
     path("profile/", SettingsProfileView.as_view(), name="settings_profile"),
-    path("subscribe", subscribe, name="subscribe"),
     path(
         "reset/<uidb64>/<token>/",
         CustomPasswordResetConfirmView.as_view(),

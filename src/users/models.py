@@ -22,38 +22,6 @@ class User(BaseModel, AbstractUser):
     def __str__(self):
         return self.username
 
-    def get_raw_vendors(self):
-        vendors = list(
-            User.objects.filter(id=self.id)
-            .select_related("vendors")
-            .values(
-                vendor_id=F("vendors__id"),
-                vendor_name=F("vendors__name"),
-            )
-        )
-
-        if len(vendors) == 1 and set(vendors[0].values()) == {None}:
-            return []
-
-        return vendors
-
-    def get_raw_products(self):
-        products = list(
-            User.objects.filter(id=self.id)
-            .select_related("products")
-            .select_related("vendors")
-            .values(
-                vendor_id=F("products__vendor__id"),
-                vendor_name=F("products__vendor__name"),
-                product_id=F("products__id"),
-                product_name=F("products__name"),
-            )
-        )
-        if len(products) == 1 and set(products[0].values()) == {None}:
-            return []
-
-        return products
-
 
 class UserTag(BaseModel):
     name = models.CharField(

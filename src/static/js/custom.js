@@ -78,12 +78,13 @@ function getContrastedColor(str){
         var button = $(this)
 
         var action = $(button).attr('id').split('_')[0];
-        var obj = $(button).attr('id').split('_')[1];
-        var id = $(button).attr('id').split('_')[2];
+        var obj_type = $(button).attr('id').split('_')[1];
+        var obj_id = $(button).attr('id').split('_')[2];
+        var project_id = $(button).attr('id').split('_')[3];
 
         $.ajax({
             url: SUBSCRIBE_URL,
-            data: { 'action': action, 'obj': obj, "id": id },
+            data: { 'action': action, 'obj_type': obj_type, "obj_id": obj_id, "project_id": project_id },
             dataType: 'json',
             type: 'POST',
             success: function(data) {
@@ -91,10 +92,10 @@ function getContrastedColor(str){
                     $(button).toggleClass('btn-default btn-danger');
 
                     if ( $(button).text().trim() == 'Subscribe' ) {
-                        $(button).text('Unsubscribe');
+                        $(button).html('<i class="fa fa-bell-o"></i> Unsubscribe');
                         $(button).attr("id", $(button).attr('id').replace('subscribe', 'unsubscribe'));
                     } else {
-                        $(button).text('Subscribe');
+                        $(button).html('<i class="fa fa-bell-o"></i> Subscribe');
                         $(button).attr("id", $(button).attr('id').replace('unsubscribe', 'subscribe'));
                     }
                 }

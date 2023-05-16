@@ -20,7 +20,7 @@
                         <tr {% if loop.first %}style="border-top: 0px;" {% endif %}>
                             <td style="border-top: 0px;">{{ vendor | humanize }}</td>
                             <td class="pull-right" style="border-top: 0px;">
-                                <button class="btn btn-danger btn-xs pull-right subscribe" id="unsubscribe_vendor_{{ vendor.vendor_id }}" type="button">Unsubscribe</button>
+                                <a class="btn btn-default btn-xs" href="{% search_vendor_url vendor %}"><i class="fa fa-bell-o"></i> Manage subscriptions</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -46,9 +46,9 @@
                         <tbody>
                         {% for product in project.subscriptions.products %}
                         <tr {% if loop.first %}style="border-top: 0px;" {% endif %}>
-                            <td style="border-top: 0px;">{{ product | humanize }}</td>
+                            <td style="border-top: 0px;">{{ product | remove_product_separator | humanize }}</td>
                             <td class="pull-right" style="border-top: 0px;">
-                                <button class="btn btn-danger btn-xs pull-right subscribe" id="unsubscribe_product_{{ product.product_id }}" type="button">Unsubscribe</button>
+                                <a class="btn btn-default btn-xs" href="{% search_vendor_url product %}"><i class="fa fa-bell-o"></i> Manage subscriptions</a>
                             </td>
                         </tr>
                         {% endfor %}

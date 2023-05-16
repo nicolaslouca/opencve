@@ -193,6 +193,17 @@ def remove_product_separator(s):
     return s.replace(PRODUCT_SEPARATOR, " ")
 
 
+@register.simple_tag
+def search_vendor_url(s):
+    base_url = reverse("subscribe")
+
+    if PRODUCT_SEPARATOR in s:
+        vendor, product = s.split(PRODUCT_SEPARATOR)
+        return f"{base_url}?vendor={vendor}&product={product}"
+
+    return f"{base_url}?vendor={s}"
+
+
 @register.filter
 def event_excerpt(details):
     if isinstance(details, list):

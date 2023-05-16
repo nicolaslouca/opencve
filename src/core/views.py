@@ -1,18 +1,19 @@
 import itertools
 import json
 import operator
-from hashlib import new
 
 from django.core.paginator import Paginator
 from django.db.models import F, Q
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, TemplateView
 
 from changes.models import Event
 from core.constants import PRODUCT_SEPARATOR
 from core.models import Cve, Cwe, Product, Vendor
 from core.utils import convert_cpes, get_cwes_details
+from opencve.utils import is_valid_uuid
+from projects.models import Project
 from users.models import CveTag, UserTag
 
 
@@ -53,11 +54,6 @@ class VendorListView(ListView):
         # Filter by keyword
         if self.request.GET.get("search"):
             products = products.filter(name__contains=self.request.GET.get("search"))
-
-        # List the user subscriptions
-        if self.request.user.is_authenticated:
-            context["user_vendors"] = self.request.user.vendors.all()
-            context["user_products"] = self.request.user.products.all()
 
         # Add the pagination
         paginator = Paginator(products, 20)
@@ -227,3 +223,94 @@ class CveDetailView(DetailView):
         cve_tag.save()
 
         return redirect("cve", cve_id=cve.cve_id)
+
+
+class SubscriptionView(TemplateView):
+    template_name = "core/vendor_subscribe.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        vendor_name = self.request.GET.get("vendor")
+        product_name = self.request.GET.get("product")
+
+        # The vendor at least is mandatory
+        if not vendor_name:
+            raise Http404()
+
+        # Get the vendor data
+        vendor = get_object_or_404(Vendor, name=vendor_name)
+        obj = vendor
+        obj_type = "vendor"
+        obj_name = obj.name
+
+        # Get the product data
+        if product_name:
+            product = get_object_or_404(Product, name=product_name, vendor=vendor)
+            obj = product
+            obj_type = "product"
+            obj_name = f"{vendor.name}{PRODUCT_SEPARATOR}{product.name}"
+
+        # Update the context
+        context.update(**{
+            "object": obj,
+            "object_type": obj_type,
+            "object_name": obj_name,
+            "projects": Project.objects.filter(user=self.request.user).order_by("name").all()
+        })
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            raise Http404()
+
+        # Handle the parameters
+        action = request.POST.get("action")
+        obj_type = request.POST.get("obj_type")
+        obj_id = request.POST.get("obj_id")
+        project_id = request.POST.get("project_id")
+
+        if (
+            not all([action, obj_type, obj_id, project_id])
+            or not is_valid_uuid(obj_id)
+            or not is_valid_uuid(project_id)
+            or action not in ["subscribe", "unsubscribe"]
+            or obj_type not in ["vendor", "product"]
+        ):
+            raise Http404()
+
+        # Check if the project belongs to the user
+        project = get_object_or_404(Project, id=project_id, user=request.user)
+
+        # Vendor subscription
+        if obj_type == "vendor":
+            vendor = get_object_or_404(Vendor, id=obj_id)
+            project_vendors = set(project.subscriptions.get("vendors"))
+
+            if action == "subscribe":
+                project_vendors.add(vendor.name)
+            else:
+                try:
+                    project_vendors.remove(vendor.name)
+                except KeyError:
+                    raise Http404()
+
+            project.subscriptions["vendors"] = list(project_vendors)
+            project.save()
+
+        if obj_type == "product":
+            product = get_object_or_404(Product, id=obj_id)
+            project_products = set(project.subscriptions.get("products"))
+
+            if action == "subscribe":
+                project_products.add(product.vendored_name)
+            else:
+                try:
+                    project_products.remove(product.vendored_name)
+                except KeyError:
+                    raise Http404()
+
+            project.subscriptions["products"] = list(project_products)
+            project.save()
+
+        return JsonResponse({"status": "ok"})

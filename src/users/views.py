@@ -9,12 +9,11 @@ from django.contrib.auth.views import (
 from django.contrib.messages.views import SuccessMessageMixin
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.views.generic import (
     CreateView,
     DeleteView,
     ListView,
-    TemplateView,
     UpdateView,
 )
 
@@ -30,8 +29,8 @@ from users.forms import (
     SetPasswordForm,
     UserTagForm,
 )
-from users.models import CveTag, User, UserTag
-from users.utils import is_valid_uuid
+from users.models import CveTag, UserTag
+from opencve.utils import is_valid_uuid
 
 
 def account(request):
@@ -42,24 +41,11 @@ class RequestViewMixin:
     def get_form_kwargs(self):
         """
         Inject the current request (useful to check the authenticated
-        user in the clean* functions).
+        user in the clean* functions for instance).
         """
         kwargs = super(RequestViewMixin, self).get_form_kwargs()
         kwargs["request"] = self.request
         return kwargs
-
-
-# TO REMOVE
-
-
-class SubscriptionsView(LoginRequiredMixin, TemplateView):
-    template_name = "users/account/subscriptions.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["vendors"] = self.request.user.get_raw_vendors()
-        context["products"] = self.request.user.get_raw_products()
-        return context
 
 
 # PROJECTS views

@@ -6,6 +6,7 @@ from django.contrib.postgres.indexes import GinIndex, OpClass
 from django.db import models
 from django.db.models.functions import Upper
 
+from core.constants import PRODUCT_SEPARATOR
 from core.utils import humanize
 from opencve.models import BaseModel
 
@@ -59,6 +60,10 @@ class Product(BaseModel):
     @property
     def human_name(self):
         return humanize(self.name)
+
+    @property
+    def vendored_name(self):
+        return f"{self.vendor.name}{PRODUCT_SEPARATOR}{self.name}"
 
     def __str__(self):
         return self.name

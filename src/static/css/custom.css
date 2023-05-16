@@ -429,3 +429,8 @@ pre.plainJSON{
 .callout.callout-success a{
     color: #003100;
 }
+
+.subscribed-projects .checkbox {
+    margin-top: 0;
+    margin-bottom: 0;
+}
