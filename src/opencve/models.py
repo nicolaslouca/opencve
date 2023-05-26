@@ -17,7 +17,7 @@ class BaseModel(models.Model):
         return {attr: str(getattr(self, attr)) for attr in attrs}
 
     def __str__(self):
-        return """<{} '{}'>""".format(self.__class__.__name__, self.id)
+        return str(self.id)
 
 
 # Update the update_at field at each change

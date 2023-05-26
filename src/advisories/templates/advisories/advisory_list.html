@@ -17,34 +17,48 @@
 <section class="content">
 
     <div class="row">
-        <div class="col-md-3">
-            <div class="box box-solid">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Sources</h3>
-                </div>
-                <div class="box-body no-padding">
-                    <ul class="nav nav-pills nav-stacked">
-                        <li><a href="#"><i class="fa fa-circle-o text-red"></i> DSA</a></li>
-                        <li><a href="#"><i class="fa fa-circle-o text-yellow"></i> JVNDB</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="box box-solid">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Search</h3>
-                </div>
+        <div class="col-md-9">
+            <div class="box">
+                <div class="box-header"></div>
                 <div class="box-body">
                     <form method="GET">
-                        <div class="form-group">
-                            <input type="text" placeholder="Search" class="form-control" name="search"  value="{% if request.GET.search %}{{ request.GET.search }}{% endif %}">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <select class="form-control select2" name="source" data-placeholder="Select a source">
+                                        <option></option>
+                                        <option>JVN</option>
+                                        <option>DSA</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" placeholder="Search in advisories" class="form-control" name="search"
+                                       value="{% if request.GET.search %}{{ request.GET.search }}{% endif %}">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary">Search</button>
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-primary pull-right">Search</button>
                     </form>
                 </div>
             </div>
         </div>
-        <div class="col-md-9">
+
+        <div class="col-md-3">
+            <div class="info-box">
+                <span class="info-box-icon bg-primary"><i class="fa fa-shield"></i></span>
+
+                <div class="info-box-content">
+                    <span class="info-box-text">Total</span>
+                    <span class="info-box-number">{{ page_obj.paginator.count }} advisories</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
             <div class="box box-primary">
                 <div class="box-body table-responsive no-padding">
                   <table class="table">

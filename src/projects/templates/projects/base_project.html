@@ -6,20 +6,12 @@
 
 <div class="row">
     <div class="col-sm-12">
-        <div class="project-header" style="background-image:url('{% static 'img/deep-green.jpg' %}')">
-            <h3>{{ project.name }}</h3>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-sm-12">
         <div class="nav-tabs-custom nav-tabs-profile nav-tabs-primary">
             <ul class="nav nav-tabs">
                 <li class="{% is_active_link 'project' %}">
                     <a href="{% url 'project' name=project.name %}">Dashboard</a>
                 </li>
-                <li class="{% is_active_link 'reports' %}">
+                <li class="{% is_active_link 'reports' 'report' %}">
                     <a href="{% url 'reports' name=project.name %}">Reports</a>
                 </li>
                 <li class="{% is_active_link 'subscriptions' %}">
@@ -27,6 +19,12 @@
                 </li>
                 <li class="{% is_active_link 'integrations' 'create_integration' 'edit_integration' %}">
                     <a href="{% url 'integrations' name=project.name %}">Integrations</a>
+                </li>
+                <li class="pull-right">
+                    <a href="{% url 'edit_project' name=project.name %}" data-toggle="tooltip" data-container="body" data-placement="left" title="" data-original-title="{{ project.description }}">
+                        <i class="fa fa-rocket"></i>
+                        Project <strong>{{ project.name }}</strong>
+                    </a>
                 </li>
             </ul>
         </div>

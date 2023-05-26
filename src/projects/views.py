@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
-from changes.models import Change
+from changes.models import Change, Report
 from projects.forms import FORM_MAPPING
 from projects.models import Integration, Project
 
@@ -29,8 +29,13 @@ def get_default_configuration():
 class ProjectMixin(LoginRequiredMixin):
     def get_object(self, queryset=None):
         return get_object_or_404(
-            self.model, user=self.request.user, name=self.kwargs["name"]
+            Project, user=self.request.user, name=self.kwargs["name"]
         )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["project"] = self.get_object()
+        return context
 
 
 class ProjectDetailView(ProjectMixin, DetailView):
@@ -53,10 +58,41 @@ class ProjectDetailView(ProjectMixin, DetailView):
         return context
 
 
-class ReportsView(ProjectMixin, DetailView):
-    # TODO: use a ListView when reports model will be available
-    model = Project
+class ReportsView(ProjectMixin, ListView):
+    context_object_name = "reports"
     template_name = "projects/reports.html"
+    paginate_by = 20
+
+    def get_queryset(self):
+        project = self.get_object()
+        query = Report.objects.filter(project=project).all()
+        return query.order_by("-updated_at")
+
+
+class ReportView(ProjectMixin, DetailView):
+    model = Report
+    template_name = "projects/report.html"
+
+    def get_object(self, queryset=None):
+        project = super(ReportView, self).get_object()
+        return get_object_or_404(
+            Report,
+            project=project,
+            created_at__day=self.kwargs["day"].day,
+            created_at__month=self.kwargs["day"].month,
+            created_at__year=self.kwargs["day"].year,
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super(ReportView, self).get_context_data(**kwargs)
+        return {
+            **context,
+            **{
+                "project": get_object_or_404(
+                    Project, user=self.request.user, name=self.kwargs["name"]
+                )
+            },
+        }
 
 
 class SubscriptionsView(ProjectMixin, DetailView):
@@ -84,13 +120,9 @@ class IntegrationViewMixin(ProjectMixin):
         raise NotImplementedError()
 
     def get_context_data(self, **kwargs):
-        # TODO: vérifier que le projet appartient bien au user
-        project = get_object_or_404(
-            Project, user=self.request.user, name=self.kwargs["name"]
-        )
         return {
             **super(IntegrationViewMixin, self).get_context_data(**kwargs),
-            **{"project": project, "type": self.request.GET.get("type")},
+            **{"type": self.request.GET.get("type")},
         }
 
     def get_form_class(self):
@@ -118,21 +150,20 @@ class IntegrationCreateView(IntegrationViewMixin, CreateView):
     def get_type(self):
         return self.request.GET.get("type")
 
-    def get_object(self, queryset=None):
-        return get_object_or_404(
-            Project, user=self.request.user, name=self.kwargs["name"]
-        )
-
     def get(self, request, *args, **kwargs):
         if request.GET.get("type") not in ["email", "webhook", "slack"]:
-            project = get_object_or_404(Project, name=self.kwargs["name"], user=self.request.user)
+            project = get_object_or_404(
+                Project, name=self.kwargs["name"], user=self.request.user
+            )
             return redirect("integrations", name=project.name)
 
         return super(IntegrationCreateView, self).get(request)
 
     def post(self, request, *args, **kwargs):
         form = self.get_form_class()(request.POST)
-        project = get_object_or_404(Project, name=self.kwargs["name"], user=self.request.user)
+        project = get_object_or_404(
+            Project, name=self.kwargs["name"], user=self.request.user
+        )
 
         if form.is_valid():
             if self.exists(project, form.cleaned_data["name"]):
@@ -187,7 +218,7 @@ class IntegrationUpdateView(IntegrationViewMixin, UpdateView):
             Integration,
             name=self.kwargs["integration"],
             project__name=self.kwargs["name"],
-            project__user=self.request.user
+            project__user=self.request.user,
         )
 
     def get_context_data(self, **kwargs):
@@ -208,7 +239,9 @@ class IntegrationUpdateView(IntegrationViewMixin, UpdateView):
         self.object = self.get_object()
 
         form = self.get_form_class()(request.POST, instance=self.object)
-        project = get_object_or_404(Project, name=self.kwargs["name"], user=self.request.user)
+        project = get_object_or_404(
+            Project, name=self.kwargs["name"], user=self.request.user
+        )
 
         if form.is_valid():
             if self.exists(project, form.cleaned_data["name"], self.object):
@@ -250,4 +283,3 @@ class IntegrationUpdateView(IntegrationViewMixin, UpdateView):
             self.template_name,
             {"form": form, "type": self.get_type(), "project": project},
         )
-

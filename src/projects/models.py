@@ -16,10 +16,10 @@ def get_default_subscriptions():
 class Project(BaseModel):
     name = models.CharField(max_length=256)  # TODO: add a regex constraint
     description = models.TextField(blank=True, null=True)
+    subscriptions = models.JSONField(default=get_default_subscriptions)
 
     # Relationships
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="projects")
-    subscriptions = models.JSONField(default=get_default_subscriptions)
 
     class Meta:
         db_table = "opencve_projects"

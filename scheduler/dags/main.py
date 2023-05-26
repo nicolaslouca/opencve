@@ -129,6 +129,9 @@ def sources():
 
     @task
     def populate_reports():
+        # Step 1 - On tri les changements par vendors & products
+        # Step 2 - Pour chacun on cherche les projets où vendor=vendor
+        # Step 3 - On itère sur les projets pour voir
         pass
 
     # Option 1 - Use the official OpenCVE KB

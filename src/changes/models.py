@@ -5,6 +5,7 @@ from django.db import models
 
 from core.models import Cve
 from opencve.models import BaseModel
+from projects.models import Project
 
 
 def get_random_sha256():
@@ -24,10 +25,11 @@ class Task(BaseModel):
 
 
 class Change(BaseModel):
-    # Relationships
-    cve = models.ForeignKey(Cve, on_delete=models.CASCADE, related_name="changes")
     path = models.TextField(default=None)
     commit = models.CharField(max_length=40)
+
+    # Relationships
+    cve = models.ForeignKey(Cve, on_delete=models.CASCADE, related_name="changes")
 
     class Meta:
         db_table = "opencve_changes"
@@ -59,3 +61,22 @@ class Event(BaseModel):
 
     def __str__(self):
         return self.type
+
+
+class Report(BaseModel):
+    seen = models.BooleanField(default=False)
+    details = models.JSONField()
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="reports")
+    changes = models.ManyToManyField(Change)
+
+    class Meta:
+        db_table = "opencve_reports"
+
+    @property
+    def vendors_as_html(self):
+        return self.details["vendors"]
+
+    @property
+    def cves_as_html(self):
+        return self.details["cves"]
