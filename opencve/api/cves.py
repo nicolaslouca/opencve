@@ -10,6 +10,7 @@ cves_fields = {
     "id": fields.String(attribute="cve_id"),
     "summary": fields.String(attribute="summary"),
     "created_at": DatetimeField(),
+    "product": fields.String(attribute="product.name"),
     "updated_at": DatetimeField(),
 }
 
